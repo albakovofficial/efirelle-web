@@ -98,6 +98,9 @@ ln -sf /etc/nginx/sites-available/efirelle /etc/nginx/sites-enabled/efirelle
 nginx -t && systemctl reload nginx || fail "nginx"
 status "nginx настроен, жду DNS для $DOMAIN"
 
+# Автовыкладка: сервер сам забирает новые версии из ветки production (её обновляет GitHub Actions).
+bash "$APP_DIR/deploy/install-autodeploy.sh" && status "автовыкладка включена" || status "автовыкладка не включилась"
+
 # HTTPS: ждём (до 6 часов), пока домен и www укажут на этот сервер.
 PUBLIC_IP=$(curl -fsS https://api.ipify.org)
 for _ in $(seq 1 720); do

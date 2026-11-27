@@ -64,6 +64,22 @@ src/
   types/index.ts          доменные типы
 ```
 
+## Выкладка
+
+Сайт работает на https://efirelle.ru (сервер Selectel, настройка — `deploy/server-setup.sh`).
+
+1. Пуш в `main` запускает GitHub Actions (`.github/workflows/ci.yml`): зависимости, сборка, проверка типов.
+2. Если всё прошло, коммит переносится в ветку `production`.
+3. Сервер раз в 2 минуты проверяет `production` и при новом коммите сам собирает и перезапускает сайт.
+
+Сломанная сборка до сервера не доходит. Включить автовыкладку на сервере (один раз, от root):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/albakovofficial/efirelle-web/main/deploy/install-autodeploy.sh | bash
+```
+
+Логи выкладки: `journalctl -u efirelle-autodeploy`. Выложить вручную: `efirelle-deploy`.
+
 ## Правила кода
 
 - **Один компонент — одна папка**: `Component.tsx` + `Component.module.css`.

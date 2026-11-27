@@ -1,0 +1,43 @@
+name: CI
+
+# Каждый пуш в main: зависимости, сборка, проверка типов.
+# Если всё прошло — коммит переносится в ветку production, откуда его забирает сервер (deploy/install-autodeploy.sh).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Зависимости
+        run: npm install --no-audit --no-fund
+
+      # Сборка идёт первой: она создаёт next-env.d.ts, без которого проверка типов не знает про CSS-модули.
+      - name: Сборка
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Проверка типов
+        run: npm run typecheck
+
+      - name: Перенос в production
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: git push --force origin HEAD:refs/heads/production
