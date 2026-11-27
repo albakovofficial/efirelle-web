@@ -5,11 +5,16 @@
 # Как это работает:
 #   1. GitHub Actions (.github/workflows/ci.yml) на каждый пуш в main собирает сайт и, если сборка прошла,
 #      переносит коммит в ветку production. Сломанная сборка до сервера не доходит.
-#   2. Сервер раз в 2 минуты сверяет production с тем, что уже выложено, и при новом коммите
+#   2. Сервер каждые 15 секунд сверяет production с тем, что уже выложено, и при новом коммите
 #      запускает efirelle-deploy: забирает код, собирает, перезапускает службу.
+#   3. После каждой выкладки efirelle-deploy заново запускает этот скрипт с --refresh, поэтому
+#      изменения в настройках выкладки из репозитория применяются на сервере сами.
 #
 # Логи: journalctl -u efirelle-autodeploy. Выложить вручную: efirelle-deploy.
 set -euo pipefail
+
+REFRESH=false
+[ "${1:-}" = "--refresh" ] && REFRESH=true
 
 APP_DIR=/opt/efirelle-web
 APP_USER=efirelle
@@ -17,7 +22,16 @@ STATE_DIR=/var/lib/efirelle
 
 mkdir -p "$STATE_DIR"
 
-cat >/usr/local/bin/efirelle-deploy <<EOF
+# Файл пишется рядом и подменяется целиком: efirelle-deploy может выполняться прямо сейчас,
+# а bash читает скрипт по ходу работы — перезапись на месте его бы сломала.
+write_file() {
+  local target=$1 mode=$2
+  cat >"$target.new"
+  chmod "$mode" "$target.new"
+  mv -f "$target.new" "$target"
+}
+
+write_file /usr/local/bin/efirelle-deploy 755 <<EOF
 #!/bin/bash
 # Обновить сайт до ветки production (по умолчанию) или до указанной: efirelle-deploy [ветка]
 set -euo pipefail
@@ -32,10 +46,11 @@ as_app env NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=1536 npm 
 systemctl restart efirelle-web
 echo "\$TARGET" >"$STATE_DIR/deployed"
 echo "Выложено: \$TARGET"
+# Применить настройки выкладки из только что выложенной версии.
+bash "$APP_DIR/deploy/install-autodeploy.sh" --refresh || echo "Настройки автовыкладки не обновились"
 EOF
-chmod 755 /usr/local/bin/efirelle-deploy
 
-cat >/usr/local/bin/efirelle-autodeploy <<EOF
+write_file /usr/local/bin/efirelle-autodeploy 755 <<EOF
 #!/bin/bash
 # Проверка ветки production: если там новый коммит — выкладка. Запускается таймером.
 set -uo pipefail
@@ -54,9 +69,8 @@ else
   exit 1
 fi
 EOF
-chmod 755 /usr/local/bin/efirelle-autodeploy
 
-cat >/etc/systemd/system/efirelle-autodeploy.service <<EOF
+write_file /etc/systemd/system/efirelle-autodeploy.service 644 <<EOF
 [Unit]
 Description=Efirelle: выкладка новой версии из ветки production
 After=network-online.target
@@ -67,20 +81,29 @@ Type=oneshot
 ExecStart=/usr/local/bin/efirelle-autodeploy
 EOF
 
-cat >/etc/systemd/system/efirelle-autodeploy.timer <<EOF
+write_file /etc/systemd/system/efirelle-autodeploy.timer 644 <<EOF
 [Unit]
-Description=Efirelle: проверка новой версии каждые 2 минуты
+Description=Efirelle: проверка новой версии каждые 15 секунд
 
 [Timer]
-OnBootSec=2min
-OnUnitActiveSec=2min
+OnBootSec=15s
+OnUnitInactiveSec=15s
+# Без этого systemd может откладывать срабатывание до минуты.
+AccuracySec=1s
 
 [Install]
 WantedBy=timers.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now efirelle-autodeploy.timer
+systemctl enable efirelle-autodeploy.timer
+# restart, чтобы новый интервал применился сразу.
+systemctl restart efirelle-autodeploy.timer
+
+if [ "$REFRESH" = true ]; then
+  exit 0
+fi
+
 systemctl start --no-block efirelle-autodeploy.service
 
 # Служебный файл статуса первичной настройки больше не нужен, когда HTTPS уже выпущен.

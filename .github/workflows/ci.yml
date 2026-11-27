@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Скрипты выкладки
+        run: for f in deploy/*.sh; do bash -n "$f"; done
+
       - name: Зависимости
         run: npm install --no-audit --no-fund
 
