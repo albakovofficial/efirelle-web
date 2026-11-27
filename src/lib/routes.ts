@@ -7,3 +7,13 @@ export function channelHref(slug: string): string {
 export function categoryHref(id: string): string {
   return `/browse/${encodeURIComponent(id)}`;
 }
+
+export function searchHref(query: string): string {
+  const q = query.trim();
+  return q ? `/search?q=${encodeURIComponent(q)}` : "/search";
+}
+
+/** Мультиэфир с выбранными каналами: /multiview?c=slug1,slug2. */
+export function multiviewHref(slugs: readonly string[]): string {
+  return slugs.length > 0 ? `/multiview?c=${slugs.map(encodeURIComponent).join(",")}` : "/multiview";
+}

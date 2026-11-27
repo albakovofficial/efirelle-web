@@ -8,6 +8,7 @@ const icons = {
   grid: { body: <><rect x="4" y="4" width="7" height="7" rx="2" /><rect x="13" y="4" width="7" height="7" rx="2" /><rect x="4" y="13" width="7" height="7" rx="2" /><rect x="13" y="13" width="7" height="7" rx="2" /></> },
   heart: { body: <path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" /> },
   plus: { body: <path d="M12 5v14M5 12h14" /> },
+  close: { body: <path d="M6 6l12 12M18 6L6 18" /> },
   clip: { body: <path d="M6 4v16M18 4v16M6 9h12M6 15h12" /> },
   multiview: { body: <><rect x="3" y="4" width="8" height="7" rx="2" /><rect x="13" y="4" width="8" height="7" rx="2" /><rect x="3" y="13" width="8" height="7" rx="2" /><rect x="13" y="13" width="8" height="7" rx="2" /></> },
   rewind: { body: <><path d="M4 12a8 8 0 108-8H7" /><path d="M9 1L6 4l3 3" /></> },

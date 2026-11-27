@@ -1,0 +1,152 @@
+/* Сетка плиток: один эфир — во всю ширину, от двух — по два в ряд. */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.grid[data-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Три эфира: первый крупно сверху, два под ним. */
+.grid[data-count="3"] .tile:first-child {
+  grid-column: span 2;
+}
+
+.tile {
+  position: relative;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0 0 3px transparent;
+  transition: box-shadow 0.15s ease;
+}
+
+.tileAudio {
+  box-shadow: 0 0 0 3px var(--color-accent);
+}
+
+.topLeft,
+.topRight {
+  position: absolute;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topLeft { left: 10px; }
+.topRight { right: 10px; }
+
+.caption {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: max-content;
+  padding: 6px 12px 6px 6px;
+  border-radius: var(--radius-md);
+  background: var(--color-glass);
+  backdrop-filter: blur(14px);
+}
+
+.caption:hover .captionName {
+  color: var(--color-accent);
+}
+
+.captionText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.captionName {
+  font-size: 13px;
+  font-weight: 800;
+  transition: color 0.15s ease;
+}
+
+.captionTitle {
+  font-size: 12px;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Список для добавления */
+.picker {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: 8px;
+}
+
+.option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  transition: border-color 0.15s ease;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.optionText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.optionName {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.optionMeta {
+  font-size: 12px;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.optionIcon {
+  flex: none;
+  color: var(--color-accent);
+}
+
+@media (max-width: 720px) {
+  .grid,
+  .grid[data-count="1"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grid[data-count="3"] .tile:first-child {
+    grid-column: auto;
+  }
+
+  .captionTitle {
+    display: none;
+  }
+}

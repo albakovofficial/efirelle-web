@@ -42,6 +42,12 @@ export interface Moment {
   offsetSeconds: number;
 }
 
+/** Канал вместе с его текущим эфиром; `stream === null` — канал не в сети. */
+export interface ChannelStatus {
+  channel: Channel;
+  stream: Stream | null;
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -80,4 +86,11 @@ export interface Viewer {
   initials: string;
   tone: Tone;
   sparks: number;
+}
+
+export interface SearchResults {
+  query: string;
+  streams: Stream[];
+  channels: ChannelStatus[];
+  categories: Category[];
 }

@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/Icon/Icon";
 import styles from "./Header.module.css";
 
-/** Поле поиска. Отправляет GET-запрос на /search?q=… — страница поиска появится на следующем этапе. */
+/** Поле поиска. Отправляет GET-запрос на /search?q=… */
 export function SearchField() {
   return (
     <form role="search" action="/search" className={styles.search}>

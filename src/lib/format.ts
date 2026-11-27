@@ -41,6 +41,9 @@ export function formatCount(
 }
 
 export const VIEWER_FORMS = ["зритель", "зрителя", "зрителей"] as const;
+export const FOLLOWER_FORMS = ["подписчик", "подписчика", "подписчиков"] as const;
+export const STREAM_FORMS = ["эфир", "эфира", "эфиров"] as const;
+export const CHANNEL_FORMS = ["канал", "канала", "каналов"] as const;
 
 /** 13690 → «3:48:10», 754 → «12:34». */
 export function formatDuration(totalSeconds: number): string {

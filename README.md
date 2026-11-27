@@ -17,8 +17,13 @@ npm run build      # продакшен-сборка
 | --- | --- |
 | `/` | Главная: витрина, живые моменты, категории, лента «Для вас» |
 | `/live/[channel]` | Эфир: плеер с перемоткой и отметками, канал, моменты, чат с прогнозом |
+| `/browse` | Обзор: все категории и все эфиры, самые популярные первыми |
+| `/browse/[category]` | Категория: обложка, эфиры внутри, кнопка «Открыть в мультиэфире» |
+| `/following` | Отслеживаемые: эфиры подписок и все каналы, включая тех, кто не в сети |
+| `/search?q=…` | Поиск по эфирам (название, канал, категория, теги), каналам и категориям |
+| `/multiview?c=slug1,slug2` | Мультиэфир: до 4 эфиров на экране, звук у одного; выбор хранится в адресе |
 
-Пример: `/live/timur-sever`. Ссылки на `/browse`, `/following`, `/multiview`, `/search` уже стоят в интерфейсе — эти страницы следующий этап.
+Примеры: `/live/timur-sever`, `/browse/music`, `/search?q=музыка`, `/multiview?c=mira,timur-sever`.
 
 ## Структура
 
@@ -29,19 +34,26 @@ src/
     globals.css           дизайн-токены: цвета, радиусы, тени
     page.tsx              главная
     live/[channel]/       страница эфира
+    browse/               обзор и страница категории ([category])
+    following/            отслеживаемые
+    search/               поиск
+    multiview/            мультиэфир
     not-found.tsx         404
   components/
-    ui/                   базовые кирпичи: Button, Icon, Avatar, Badge, Tag,
-                          Thumbnail, AutoGrid, Section, SegmentedControl, SparksBalance
+    ui/                   базовые кирпичи: Button, Icon, Avatar, Badge, Tag, Thumbnail,
+                          AutoGrid, Section, PageHeader, SegmentedControl, SparksBalance
     layout/               каркас: Header, Logo, FollowingSidebar, MobileNav, PageShell
     home/                 блоки главной: FeaturedHero, FollowingStrip, StreamsForYou
     stream/               карточки эфира: StreamCard, StreamListItem
     moments/              MomentCard
     category/             CategoryCard
+    channel/              ChannelCard (канал со статусом: в эфире / не в сети)
+    multiview/            MultiviewBoard (сетка мультиэфира и выбор эфиров)
     watch/                страница эфира: Player (+ Timeline, PlayerControls),
                           StreamStage, StreamMoments, ChannelBar (+ FollowButton)
     chat/                 ChatPanel, ChatLine, ChatComposer, PredictionCard, chatBadge
   config/navigation.ts    разделы сайта (общие для шапки и нижней панели)
+  config/multiview.ts     лимит эфиров на экране мультиэфира
   data/
     api.ts                ЕДИНСТВЕННАЯ точка получения данных
     mock.ts               тестовые данные (импортируются только из api.ts)

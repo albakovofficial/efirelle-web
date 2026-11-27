@@ -1,0 +1,70 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
+.link {
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.link:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+/* Канал не в сети — карточка без фона, чтобы эфиры читались первыми. */
+.idle {
+  background: transparent;
+}
+
+.text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.verified {
+  flex: none;
+  color: var(--color-accent);
+}
+
+.meta {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.statusText {
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.offline {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-muted);
+}

@@ -17,6 +17,8 @@ export const channels = {
   sonya: channel({ slug: "sonya-ri", name: "Соня Ри", initials: "СР", tone: "rose", followers: 18_000 }),
   kai: channel({ slug: "kai-vetrov", name: "Кай Ветров", initials: "КВ", tone: "butter", followers: 205_000 }),
   veterFm: channel({ slug: "veter-fm", name: "Ветер FM", initials: "ВF", tone: "lavender", followers: 154_000 }),
+  lev: channel({ slug: "lev-orlov", name: "Лев Орлов", initials: "ЛО", tone: "sky", followers: 63_000 }),
+  eva: channel({ slug: "eva-cinema", name: "Ева Синема", initials: "ЕС", tone: "peach", followers: 35_000 }),
 } as const;
 
 const stream = (s: Stream): Stream => s;
@@ -74,7 +76,10 @@ export const streams: Stream[] = [
   }),
 ];
 
-export const followingSlugs = ["timur-sever", "mira", "alisa-green", "dom-kulinara", "sound-lab", "marat-put"];
+/** Отслеживаемые каналы. Те, у кого нет эфира в `streams`, сейчас не в сети. */
+export const followingSlugs = [
+  "timur-sever", "mira", "alisa-green", "dom-kulinara", "sound-lab", "marat-put", "lev-orlov", "eva-cinema",
+];
 export const featuredIds = ["s-timur", "s-mira", "s-alisa", "s-sound", "s-kitchen"];
 export const forYouIds = ["s-nika", "s-sonya", "s-kai", "s-veter", "s-marat", "s-kitchen"];
 
