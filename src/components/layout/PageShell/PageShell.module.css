@@ -1,0 +1,36 @@
+.shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  padding: 24px var(--page-gutter) 64px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.main.dense {
+  gap: 20px;
+}
+
+@media (max-width: 1080px) {
+  .shell {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding-top: 16px;
+    /* место под плавающую нижнюю панель */
+    padding-bottom: 120px;
+  }
+
+  .main {
+    gap: 32px;
+  }
+}

@@ -1,0 +1,43 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.sm {
+  font-size: 11px;
+  padding: 4px 7px;
+  border-radius: 7px;
+}
+
+.md {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.live {
+  background: var(--color-live);
+  color: var(--color-on-dark);
+  letter-spacing: 0.08em;
+}
+
+.glass {
+  background: var(--color-glass);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.dark {
+  background: rgba(22, 21, 28, 0.84);
+  color: var(--color-on-dark);
+  font-weight: 700;
+}
+
+.tone {
+  background: var(--tone-surface);
+  color: var(--tone-ink);
+}

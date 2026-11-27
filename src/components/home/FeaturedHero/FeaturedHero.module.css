@@ -1,0 +1,101 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.main {
+  flex: 999 1 520px;
+  min-height: 420px;
+  display: block;
+}
+
+.badges {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  gap: 8px;
+}
+
+.play {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 16px 40px -12px rgba(30, 78, 153, 0.4);
+  transition: transform 0.2s ease;
+}
+
+.main:hover .play {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.caption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(14px);
+}
+
+.captionText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.meta {
+  font-size: 14px;
+  color: var(--color-ink-soft);
+}
+
+.side {
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sideCaption {
+  padding: 4px 10px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+
+@media (max-width: 720px) {
+  .main {
+    min-height: 260px;
+  }
+
+  .title {
+    font-size: 17px;
+  }
+
+  .side {
+    display: none;
+  }
+}

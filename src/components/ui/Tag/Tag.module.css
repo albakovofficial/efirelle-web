@@ -1,0 +1,23 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: #edebf3;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.toned {
+  background: var(--tone-surface);
+  color: var(--tone-ink);
+  font-weight: 800;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

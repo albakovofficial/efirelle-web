@@ -1,0 +1,12 @@
+.balance {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.icon {
+  color: var(--color-accent);
+}

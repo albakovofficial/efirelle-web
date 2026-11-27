@@ -1,0 +1,38 @@
+.thumb {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--tone-surface);
+  isolation: isolate;
+}
+
+.ratio-16-9 { aspect-ratio: 16 / 9; }
+.ratio-3-4 { aspect-ratio: 3 / 4; }
+.ratio-free { height: 100%; }
+
+.radius-md { border-radius: var(--radius-md); }
+.radius-lg { border-radius: var(--radius-lg); }
+.radius-xl { border-radius: var(--radius-xl); }
+
+.orbLarge,
+.orbSmall {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  aspect-ratio: 1;
+}
+
+.orbLarge {
+  width: 70%;
+  right: -18%;
+  top: -34%;
+  background: var(--tone-shade);
+}
+
+.orbSmall {
+  width: 30%;
+  left: 10%;
+  bottom: -14%;
+  background: #ffffff;
+  opacity: 0.5;
+}

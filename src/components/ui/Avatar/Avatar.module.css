@@ -1,0 +1,43 @@
+.avatar {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tone-surface);
+  color: var(--tone-ink);
+  font-weight: 800;
+  user-select: none;
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+.rounded {
+  border-radius: var(--radius-md);
+}
+
+.sm { width: 28px; height: 28px; font-size: 11px; }
+.md { width: 40px; height: 40px; font-size: 13px; }
+.lg { width: 48px; height: 48px; font-size: 14px; }
+.xl { width: 60px; height: 60px; font-size: 18px; }
+
+.ring-live {
+  box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 5px var(--color-live);
+}
+
+.ring-active {
+  box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 5px var(--color-ink);
+}
+
+.liveDot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-live);
+  border: 2px solid var(--color-bg);
+}

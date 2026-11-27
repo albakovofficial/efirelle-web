@@ -1,0 +1,122 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(246, 245, 249, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.inner {
+  min-height: var(--header-height);
+  padding: 12px var(--page-gutter);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Навигация */
+.nav {
+  display: flex;
+  gap: 4px;
+}
+
+.navLink {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-muted);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.navLink:hover {
+  color: var(--color-ink);
+}
+
+.navLinkActive {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Поиск */
+.search {
+  flex: 1 1 260px;
+  max-width: 520px;
+  margin: 0 auto;
+  height: var(--tap-size);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+}
+
+.search:focus-within {
+  border-color: var(--color-accent);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+/* Действия справа */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.sparks {
+  height: var(--tap-size);
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff5a61;
+}
+
+.mobileOnly {
+  display: none;
+}
+
+@media (max-width: 1080px) {
+  .sparks {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .nav,
+  .search,
+  .desktopOnly {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: inline-flex;
+  }
+
+  .inner {
+    gap: 12px;
+  }
+}

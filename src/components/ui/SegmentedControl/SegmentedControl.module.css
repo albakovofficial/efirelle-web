@@ -1,0 +1,51 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Отдельные пилюли — фильтры ленты. */
+.pills .option {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+}
+
+.pills .selected {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-on-dark);
+}
+
+/* Лоток — компактные вкладки внутри панели. */
+.tray {
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--color-surface-muted);
+}
+
+.tray .option {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.tray .selected {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-soft);
+}
