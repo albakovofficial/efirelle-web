@@ -113,7 +113,7 @@ export const categories: Category[] = [
 export const chatHistory: ChatEntry[] = [
   { kind: "message", id: "c1", author: "Аня", tone: "rose", badge: { type: "subscriber", months: 12 }, text: "этот камбэк войдёт в историю" },
   { kind: "message", id: "c2", author: "Дмитрий", tone: "sky", badge: { type: "newcomer" }, text: "первый раз тут, атмосфера топ" },
-  { kind: "message", id: "c3", author: "Ильдар", tone: "lavender", badge: { type: "moderator" }, text: "Прогноз открыт, ставим искры" },
+  { kind: "message", id: "c3", author: "Ильдар", tone: "lavender", badge: { type: "moderator" }, text: "Прогноз открыт, выбирайте вариант" },
   { kind: "message", id: "c4", author: "Лиза", tone: "mint", badge: { type: "vip" }, text: "Тимур, следи за левым флангом" },
   { kind: "message", id: "c5", author: "Георгий", tone: "butter", badge: { type: "subscriber", months: 3 }, text: "GG, если возьмёт эту карту" },
   { kind: "message", id: "c6", author: "Катя", tone: "peach", badge: { type: "newcomer" }, text: "а клип второй карты уже есть?" },
