@@ -5,8 +5,11 @@
 # Как это работает:
 #   1. GitHub Actions (.github/workflows/ci.yml) на каждый пуш в main собирает сайт и, если сборка прошла,
 #      переносит коммит в ветку production. Сломанная сборка до сервера не доходит.
-#   2. Сервер каждые 15 секунд сверяет production с тем, что уже выложено, и при новом коммите
-#      запускает efirelle-deploy: забирает код, собирает, перезапускает службу.
+#   2. Сразу после этого Actions делает POST на https://efirelle.ru/_deploy-hook, и сервер тут же
+#      сверяет production с выложенной версией; при новом коммите запускает efirelle-deploy:
+#      забирает код, собирает, перезапускает службу. Адрес ничего не принимает и не раскрывает —
+#      он только просит сервер свериться с GitHub, поэтому секрет не нужен; частота ограничена в nginx.
+#      Страховка, если сигнал не дошёл: та же проверка по таймеру каждые 15 секунд.
 #   3. После каждой выкладки efirelle-deploy заново запускает этот скрипт с --refresh, поэтому
 #      изменения в настройках выкладки из репозитория применяются на сервере сами.
 #
@@ -68,7 +71,66 @@ else
   echo "Выкладка \$REMOTE не удалась"
   exit 1
 fi
+# Пока шла сборка, мог прийти ещё коммит — сразу проверяем снова.
+exec /usr/local/bin/efirelle-autodeploy
 EOF
+
+# Мгновенный запуск: nginx передаёт POST /_deploy-hook на 127.0.0.1:9100, systemd на каждое
+# подключение запускает efirelle-hook — он отвечает 202 и стартует проверку новой версии.
+write_file /usr/local/bin/efirelle-hook 755 <<'EOF'
+#!/bin/bash
+# Читаем заголовки запроса (тело не нужно) и сразу отвечаем.
+while IFS= read -r -t 2 line && [ "${line%$'\r'}" != "" ]; do :; done
+printf 'HTTP/1.1 202 Accepted\r\nContent-Type: text/plain\r\nContent-Length: 3\r\nConnection: close\r\n\r\nok\n'
+systemctl start --no-block efirelle-autodeploy.service
+EOF
+
+write_file /etc/systemd/system/efirelle-hook.socket 644 <<EOF
+[Unit]
+Description=Efirelle: приём сигнала о новой версии
+
+[Socket]
+ListenStream=127.0.0.1:9100
+Accept=yes
+MaxConnections=4
+
+[Install]
+WantedBy=sockets.target
+EOF
+
+write_file /etc/systemd/system/efirelle-hook@.service 644 <<EOF
+[Unit]
+Description=Efirelle: сигнал о новой версии
+
+[Service]
+ExecStart=/usr/local/bin/efirelle-hook
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal
+RuntimeMaxSec=10
+EOF
+
+write_file /etc/nginx/conf.d/efirelle-hook-limit.conf 644 <<'EOF'
+limit_req_zone $binary_remote_addr zone=efirelle_hook:1m rate=10r/m;
+EOF
+
+mkdir -p /etc/nginx/snippets
+write_file /etc/nginx/snippets/efirelle-deploy-hook.conf 644 <<'EOF'
+location = /_deploy-hook {
+    limit_except POST { deny all; }
+    limit_req zone=efirelle_hook burst=5 nodelay;
+    proxy_pass http://127.0.0.1:9100;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_read_timeout 5s;
+}
+EOF
+
+# Подключаем location во все server-блоки сайта (и до, и после выпуска HTTPS).
+SITE=/etc/nginx/sites-available/efirelle
+if [ -f "$SITE" ] && ! grep -q efirelle-deploy-hook "$SITE"; then
+  sed -i '/server_name /a\    include snippets/efirelle-deploy-hook.conf;' "$SITE"
+fi
 
 write_file /etc/systemd/system/efirelle-autodeploy.service 644 <<EOF
 [Unit]
@@ -96,6 +158,13 @@ WantedBy=timers.target
 EOF
 
 systemctl daemon-reload
+systemctl enable --now efirelle-hook.socket
+if nginx -t 2>/dev/null; then
+  systemctl reload nginx
+else
+  echo "nginx: конфигурация с /_deploy-hook не прошла проверку — сигнал не работает, выкладка идёт по таймеру"
+  nginx -t || true
+fi
 systemctl enable efirelle-autodeploy.timer
 # restart, чтобы новый интервал применился сразу.
 systemctl restart efirelle-autodeploy.timer
