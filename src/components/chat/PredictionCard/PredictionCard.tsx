@@ -7,7 +7,8 @@ import type { Prediction } from "@/types";
 import styles from "./PredictionCard.module.css";
 
 const PARTICIPANT_FORMS = ["участник", "участника", "участников"] as const;
-const STAKE_SPARKS = 100;
+/** Награда за верный прогноз. Участие бесплатное — искры не списываются. */
+const REWARD_SPARKS = 100;
 
 /** Прогноз зрителей: таймер, варианты с долей голосов, выбор варианта. */
 export function PredictionCard({ prediction }: { prediction: Prediction }) {
@@ -25,7 +26,7 @@ export function PredictionCard({ prediction }: { prediction: Prediction }) {
     <div className={styles.card} role="group" aria-labelledby={`prediction-${prediction.id}`}>
       <div className={styles.head}>
         <span>ПРОГНОЗ</span>
-        <span>{closed ? "приём ставок закрыт" : `ещё ${formatDuration(secondsLeft)}`}</span>
+        <span>{closed ? "приём прогнозов закрыт" : `ещё ${formatDuration(secondsLeft)}`}</span>
       </div>
       <p id={`prediction-${prediction.id}`} className={styles.question}>{prediction.question}</p>
 
@@ -49,7 +50,9 @@ export function PredictionCard({ prediction }: { prediction: Prediction }) {
       })}
 
       <p className={styles.footer}>
-        {choice ? `Ставка принята · ${STAKE_SPARKS} искр` : `Ставка в искрах · ${formatCount(prediction.participants, PARTICIPANT_FORMS, { compact: false })}`}
+        {choice
+          ? `Прогноз принят · за верный ответ +${REWARD_SPARKS} искр`
+          : `Бесплатно · за верный ответ +${REWARD_SPARKS} искр · ${formatCount(prediction.participants, PARTICIPANT_FORMS, { compact: false })}`}
       </p>
     </div>
   );

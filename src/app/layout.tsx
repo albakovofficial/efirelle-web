@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import type { ReactNode } from "react";
+import { Footer } from "@/components/layout/Footer/Footer";
 import { Header } from "@/components/layout/Header/Header";
 import { MobileNav } from "@/components/layout/MobileNav/MobileNav";
 import { getCurrentViewer } from "@/data/api";
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body>
         <Header viewer={viewer} />
         {children}
+        <Footer />
         <MobileNav />
       </body>
     </html>

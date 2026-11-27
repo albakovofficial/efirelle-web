@@ -26,8 +26,8 @@
 @media (max-width: 720px) {
   .shell {
     padding-top: 16px;
-    /* место под плавающую нижнюю панель */
-    padding-bottom: 120px;
+    /* место под плавающую нижнюю панель оставляет подвал (Footer) */
+    padding-bottom: 32px;
   }
 
   .main {
