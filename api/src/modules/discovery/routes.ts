@@ -7,6 +7,7 @@ import type { ChannelRepository, StreamDto } from "../channels/repository.js";
 import type { MomentService } from "../moments/service.js";
 import type { RecordingService } from "../recordings/service.js";
 import type { ScheduleService } from "../schedule/service.js";
+import { loadTaste, rankStreams } from "./recommend.js";
 
 interface CategoryRow {
   id: string;
@@ -25,6 +26,10 @@ export interface CategoryDto {
 }
 
 const searchQuery = z.object({ q: z.string().trim().max(80).default("") });
+const recommendedQuery = z.object({
+  offset: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+});
 const liveQuery = z.object({
   category: z.string().max(40).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(48),
@@ -72,6 +77,17 @@ export function registerDiscoveryRoutes(
   app.get("/api/streams/live", async (request) => {
     const query = parse(liveQuery, request.query);
     return { streams: await channels.live({ categoryId: query.category, limit: query.limit }) };
+  });
+
+  /**
+   * «Сейчас в эфире» в поиске: все идущие эфиры в порядке рекомендаций для этого зрителя,
+   * страницами — первые десять в ленте, остальные по кнопке «Ещё».
+   */
+  app.get("/api/streams/recommended", async (request) => {
+    const { offset, limit } = parse(recommendedQuery, request.query);
+    const [live, taste] = await Promise.all([channels.live({ limit: 1000 }), loadTaste(ctx, request.viewer?.id ?? null)]);
+    const ranked = rankStreams(live, taste);
+    return { streams: ranked.slice(offset, offset + limit), total: ranked.length };
   });
 
   app.get("/api/categories", async () => {

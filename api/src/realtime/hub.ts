@@ -16,6 +16,8 @@ export type ServerEvent =
   | { type: "prediction"; prediction: unknown }
   | { type: "moment"; moment: unknown }
   | { type: "raid"; target: string; targetName: string }
+  /** Автор поменял правила чата (медленный режим, «только подписчики»). */
+  | { type: "rules"; rules: { slowModeSeconds: number; followersOnly: boolean } }
   | { type: "error"; message: string };
 
 /**
