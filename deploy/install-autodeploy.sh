@@ -46,6 +46,11 @@ TARGET=\$(as_app git rev-parse FETCH_HEAD)
 as_app git reset --quiet --hard "\$TARGET"
 as_app npm install --no-audit --no-fund
 as_app env NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=1536 npm run build
+# API: сборка; миграции базы применяются при запуске службы.
+if [ -d "$APP_DIR/api" ]; then
+  (cd "$APP_DIR/api" && as_app npm install --no-audit --no-fund && as_app npm run build)
+  systemctl restart efirelle-api 2>/dev/null || true
+fi
 systemctl restart efirelle-web
 echo "\$TARGET" >"$STATE_DIR/deployed"
 echo "Выложено: \$TARGET"
@@ -168,6 +173,9 @@ fi
 systemctl enable efirelle-autodeploy.timer
 # restart, чтобы новый интервал применился сразу.
 systemctl restart efirelle-autodeploy.timer
+
+# Серверная часть: база, медиасервер, API, маршруты nginx (deploy/provision.sh).
+bash "$APP_DIR/deploy/provision.sh" || echo "Настройка серверной части завершилась с ошибкой — см. /var/www/html/efirelle-provision.txt"
 
 if [ "$REFRESH" = true ]; then
   exit 0

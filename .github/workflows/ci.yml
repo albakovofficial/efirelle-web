@@ -1,7 +1,7 @@
 name: CI
 
-# Каждый пуш в main: зависимости, сборка, проверка типов.
-# Если всё прошло — коммит переносится в ветку production, откуда его забирает сервер (deploy/install-autodeploy.sh).
+# Каждый пуш в main: сайт (сборка, типы) и API (сборка, тесты на PostgreSQL).
+# Если оба прошли — коммит переносится в ветку production, откуда его забирает сервер (deploy/install-autodeploy.sh).
 on:
   push:
     branches: [main]
@@ -16,7 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  web:
+    name: Сайт
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -41,11 +42,55 @@ jobs:
       - name: Проверка типов
         run: npm run typecheck
 
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: efirelle_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: api
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/efirelle_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Зависимости
+        run: npm install --no-audit --no-fund
+
+      - name: Сборка
+        run: npm run build
+
+      - name: Тесты
+        run: npm test
+
+  deploy:
+    name: Выкладка
+    needs: [web, api]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Перенос в production
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: git push --force origin HEAD:refs/heads/production
 
       # Сервер сразу забирает новую версию. Если сигнал не дошёл — подхватит по таймеру за 15 секунд.
       - name: Сигнал серверу
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: curl -fsS -m 15 -X POST https://efirelle.ru/_deploy-hook || echo "::warning::Сервер не ответил на сигнал — выкладка пройдёт по таймеру"
