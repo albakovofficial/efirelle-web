@@ -33,6 +33,6 @@
   width: 30%;
   left: 10%;
   bottom: -14%;
-  background: #ffffff;
+  background: var(--color-highlight);
   opacity: 0.5;
 }

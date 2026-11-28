@@ -1,16 +1,17 @@
 import type { CSSProperties } from "react";
 import type { MomentKind, Tone } from "@/types";
 
-/** Пастельная палитра: фон, более глубокий оттенок для декора и цвет текста поверх. */
-export const tones: Record<Tone, { surface: string; shade: string; ink: string }> = {
-  ink: { surface: "#16151C", shade: "#2A2833", ink: "#FFFFFF" },
-  lavender: { surface: "#E8E3FF", shade: "#D6CCFF", ink: "#3D2FA8" },
-  peach: { surface: "#FFE4D6", shade: "#FFCDB4", ink: "#8A3B17" },
-  mint: { surface: "#DDF1E8", shade: "#C3E6D6", ink: "#1F6B4A" },
-  sky: { surface: "#DCEBFF", shade: "#C2DAFF", ink: "#1E4E99" },
-  butter: { surface: "#FFF1C9", shade: "#FFE39A", ink: "#7A5A00" },
-  rose: { surface: "#F7DDEB", shade: "#EFC3DA", ink: "#8E2A5E" },
-};
+/**
+ * Пастельные тона: фон, более глубокий оттенок для декора и цвет текста поверх.
+ * Сами цвета — CSS-переменные в globals.css (`--tone-<имя>-surface/shade/ink`), у каждой есть
+ * значение для тёмной темы «Графит», поэтому тон меняется вместе с темой без JavaScript.
+ */
+export const tones: Record<Tone, { surface: string; shade: string; ink: string }> = Object.fromEntries(
+  (["ink", "lavender", "peach", "mint", "sky", "butter", "rose"] as const).map((tone) => [
+    tone,
+    { surface: `var(--tone-${tone}-surface)`, shade: `var(--tone-${tone}-shade)`, ink: `var(--tone-${tone}-ink)` },
+  ]),
+) as Record<Tone, { surface: string; shade: string; ink: string }>;
 
 type ToneVars = CSSProperties & Record<`--${string}`, string>;
 

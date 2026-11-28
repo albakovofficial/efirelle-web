@@ -1,6 +1,11 @@
-/* Дизайн-токены и базовые стили. Компоненты используют только эти переменные. */
+/*
+ * Дизайн-токены и базовые стили. Компоненты используют только эти переменные.
+ * Тёмная тема «Графит» включается сама по настройке системы (prefers-color-scheme).
+ */
 
 :root {
+  color-scheme: light dark;
+
   --color-bg: #f6f5f9;
   --color-surface: #ffffff;
   --color-surface-muted: #f1eff6;
@@ -16,6 +21,33 @@
   --color-live: #d9303a;
   --color-on-dark: #ffffff;
   --color-glass: rgba(255, 255, 255, 0.84);
+  /* Тёмная плашка под белым текстом; в тёмной теме — приподнятая серая. */
+  --color-ink-surface: #16151c;
+  --color-ink-surface-hover: #2a2833;
+  /* Светлый блик на обложках (поверх него — полупрозрачность компонента). */
+  --color-highlight: #ffffff;
+
+  --tone-ink-surface: #16151c;
+  --tone-ink-shade: #2a2833;
+  --tone-ink-ink: #ffffff;
+  --tone-lavender-surface: #e8e3ff;
+  --tone-lavender-shade: #d6ccff;
+  --tone-lavender-ink: #3d2fa8;
+  --tone-peach-surface: #ffe4d6;
+  --tone-peach-shade: #ffcdb4;
+  --tone-peach-ink: #8a3b17;
+  --tone-mint-surface: #ddf1e8;
+  --tone-mint-shade: #c3e6d6;
+  --tone-mint-ink: #1f6b4a;
+  --tone-sky-surface: #dcebff;
+  --tone-sky-shade: #c2daff;
+  --tone-sky-ink: #1e4e99;
+  --tone-butter-surface: #fff1c9;
+  --tone-butter-shade: #ffe39a;
+  --tone-butter-ink: #7a5a00;
+  --tone-rose-surface: #f7ddeb;
+  --tone-rose-shade: #efc3da;
+  --tone-rose-ink: #8e2a5e;
 
   --radius-sm: 10px;
   --radius-md: 14px;
@@ -32,6 +64,53 @@
   --tap-size: 44px;
 
   --font-sans: var(--font-manrope), system-ui, -apple-system, sans-serif;
+}
+
+/* Тёмная тема «Графит»: нейтральный почти чёрный, приподнятые серые поверхности, акцент светлее. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f0f13;
+    --color-surface: #1b1b22;
+    --color-surface-muted: #24242c;
+    --color-ink: #f2f1f6;
+    --color-ink-soft: #c9c7d3;
+    --color-muted: #8d8a9c;
+    --color-line: #2c2c35;
+    --color-accent: #5b7fff;
+    --color-accent-hover: #7391ff;
+    --color-accent-soft: rgba(91, 127, 255, 0.16);
+    --color-accent-ink: #a9bbff;
+    --color-live: #e5484d;
+    --color-glass: rgba(27, 27, 34, 0.86);
+    --color-ink-surface: #2e2e38;
+    --color-ink-surface-hover: #3a3a46;
+    --color-highlight: rgba(255, 255, 255, 0.12);
+
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-float: 0 30px 70px -40px rgba(0, 0, 0, 0.8);
+    --shadow-bar: 0 16px 40px -20px rgba(0, 0, 0, 0.7);
+
+    --tone-ink-surface: #2e2e38;
+    --tone-ink-shade: #3a3a46;
+    --tone-lavender-surface: #2e2550;
+    --tone-lavender-shade: #3a2f66;
+    --tone-lavender-ink: #c6b9ff;
+    --tone-peach-surface: #3a2a22;
+    --tone-peach-shade: #4a352b;
+    --tone-peach-ink: #f2c3a8;
+    --tone-mint-surface: #1d3a2e;
+    --tone-mint-shade: #24473a;
+    --tone-mint-ink: #9fe3c2;
+    --tone-sky-surface: #1d2c4a;
+    --tone-sky-shade: #243860;
+    --tone-sky-ink: #a9c8ff;
+    --tone-butter-surface: #3a3216;
+    --tone-butter-shade: #4a401c;
+    --tone-butter-ink: #f0d27a;
+    --tone-rose-surface: #3a2232;
+    --tone-rose-shade: #4a2b40;
+    --tone-rose-ink: #f2b8d6;
+  }
 }
 
 *,

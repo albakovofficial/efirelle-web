@@ -21,7 +21,7 @@
 }
 
 .pills .selected {
-  background: var(--color-ink);
+  background: var(--color-ink-surface);
   border-color: var(--color-ink);
   color: var(--color-on-dark);
 }

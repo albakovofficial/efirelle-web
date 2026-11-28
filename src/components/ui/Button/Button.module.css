@@ -32,8 +32,8 @@
 .primary { background: var(--color-accent); color: var(--color-on-dark); }
 .primary:hover { background: var(--color-accent-hover); }
 
-.dark { background: var(--color-ink); color: var(--color-on-dark); }
-.dark:hover { background: #2a2833; }
+.dark { background: var(--color-ink-surface); color: var(--color-on-dark); }
+.dark:hover { background: var(--color-ink-surface-hover); }
 
 .secondary { background: var(--color-surface); border-color: var(--color-line); color: var(--color-ink); }
 .secondary:hover { background: var(--color-surface-muted); }
