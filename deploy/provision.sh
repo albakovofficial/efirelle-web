@@ -251,5 +251,6 @@ for _ in $(seq 15); do
 done
 step "API /api/health: $HEALTH"
 step "Файрвол сервера: $(command -v ufw >/dev/null && ufw status | head -n1 || echo 'не установлен')"
+step "ffmpeg (качества 720p/480p): $(command -v ffmpeg >/dev/null && echo есть || echo нет)"
 step "MediaMTX API: $(curl -fsS -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:9997/v3/paths/list 2>/dev/null || echo нет)"
 grep -q '^SMTP_PASSWORD=.\+' "$API_ENV" && step "Почта: SMTP настроен" || step "Почта: SMTP_PASSWORD не задан — восстановление пароля по почте выключено"
