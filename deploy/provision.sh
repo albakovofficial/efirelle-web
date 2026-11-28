@@ -15,7 +15,8 @@ REPORT=/var/www/html/efirelle-provision.txt
 SITE=/etc/nginx/sites-available/efirelle
 
 mkdir -p /var/www/html "$ENV_DIR"
-: >"$REPORT.new"
+# Метка UTF-8 в начале — чтобы браузер показал русский текст без «кракозябр».
+printf '\xEF\xBB\xBF' >"$REPORT.new"
 step() { echo "$(date -u +%FT%TZ) $*" | tee -a "$REPORT.new"; }
 finish() { mv -f "$REPORT.new" "$REPORT"; }
 trap finish EXIT
@@ -157,6 +158,11 @@ systemctl enable efirelle-api mediamtx >/dev/null 2>&1
 systemctl is-active --quiet efirelle-api || systemctl start efirelle-api
 if [ "${MEDIAMTX_CHANGED:-0}" = 1 ]; then systemctl restart mediamtx; else systemctl is-active --quiet mediamtx || systemctl start mediamtx; fi
 
+# Если на сервере включён файрвол — открываем приём эфиров по RTMP.
+if command -v ufw >/dev/null && ufw status | grep -q "Status: active"; then
+  ufw allow 1935/tcp >/dev/null && step "Файрвол: порт 1935 (RTMP) открыт"
+fi
+
 # --- nginx: /api, WebSocket чата, видео -----------------------------------------
 cat >/etc/nginx/conf.d/efirelle-api-map.conf <<'EOF'
 map $http_upgrade $efirelle_connection {
@@ -207,5 +213,6 @@ for _ in $(seq 15); do
   sleep 1
 done
 step "API /api/health: $HEALTH"
+step "Файрвол сервера: $(command -v ufw >/dev/null && ufw status | head -n1 || echo 'не установлен')"
 step "MediaMTX API: $(curl -fsS -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:9997/v3/paths/list 2>/dev/null || echo нет)"
 grep -q '^SMTP_PASSWORD=.\+' "$API_ENV" && step "Почта: SMTP настроен" || step "Почта: SMTP_PASSWORD не задан — восстановление пароля по почте выключено"
