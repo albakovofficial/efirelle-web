@@ -13,7 +13,7 @@ const FORMATS: { ext: string; matches: (b: Buffer) => boolean }[] = [
 
 export const IMAGE_CONTENT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
-/** Картинки пользователей: аватары, баннеры, эмодзи. Лежат на диске, раздаёт их nginx по /media/. */
+/** Файлы пользователей: аватары, баннеры, эмодзи, клипы. Лежат на диске, раздаёт их nginx по /media/. */
 export class Uploads {
   constructor(
     private readonly dir: string,
@@ -32,12 +32,21 @@ export class Uploads {
     return `${this.publicUrl}/media/${name}`;
   }
 
+  /** Сохраняет клип (MP4, уже проверенный медиасервером) в media/clips и возвращает адрес. */
+  async saveClip(body: Buffer): Promise<string> {
+    const dir = join(this.dir, "clips");
+    await mkdir(dir, { recursive: true });
+    const name = `${randomBytes(16).toString("hex")}.mp4`;
+    await writeFile(join(dir, name), body);
+    return `${this.publicUrl}/media/clips/${name}`;
+  }
+
   /** Удаляет файл, если адрес наш. Чужие адреса и уже удалённые файлы пропускаются. */
   async remove(url: string | null | undefined): Promise<void> {
     const prefix = `${this.publicUrl}/media/`;
     if (!url?.startsWith(prefix)) return;
     const name = url.slice(prefix.length);
-    if (!/^[0-9a-f]{32}\.(png|jpg|webp|gif)$/.test(name)) return;
+    if (!/^(clips\/)?[0-9a-f]{32}\.(png|jpg|webp|gif|mp4)$/.test(name)) return;
     await unlink(join(this.dir, name)).catch(() => undefined);
   }
 }

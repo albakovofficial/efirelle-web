@@ -23,6 +23,7 @@ const timer = setInterval(() => {
   services.live.reconcile().catch((error: unknown) => app.log.error(error));
   services.live.recordPeaks().catch((error: unknown) => app.log.error(error));
   services.schedule.sendDueReminders().catch((error: unknown) => app.log.error(error));
+  services.recordings.processPending().catch((error: unknown) => app.log.error(error));
 }, RECONCILE_INTERVAL_MS);
 
 async function shutdown(): Promise<void> {

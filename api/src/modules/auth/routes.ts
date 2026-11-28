@@ -157,11 +157,12 @@ export function registerAuthRoutes(app: FastifyInstance, ctx: AppContext): void 
     const body = parse(deleteBody, request.body);
     const user = await ctx.db.one<{ password_hash: string }>("SELECT password_hash FROM users WHERE id = $1", [viewer.id]);
     if (!user || !(await verifyPassword(body.password, user.password_hash))) throw unauthorized("Неверный пароль");
-    // Картинки аккаунта удаляются с диска вместе с ним.
+    // Картинки и клипы канала удаляются с диска вместе с аккаунтом.
     const images = await ctx.db.rows<{ url: string | null }>(
       `SELECT avatar_url AS url FROM users WHERE id = $1
        UNION ALL SELECT banner_url FROM channels WHERE user_id = $1
-       UNION ALL SELECT url FROM emotes WHERE channel_id = $1`,
+       UNION ALL SELECT url FROM emotes WHERE channel_id = $1
+       UNION ALL SELECT url FROM clips WHERE channel_id = $1`,
       [viewer.id],
     );
     await ctx.db.pool.query("DELETE FROM users WHERE id = $1", [viewer.id]);

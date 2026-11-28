@@ -65,6 +65,8 @@ fi
 
 # --- Картинки пользователей и записи эфиров -------------------------------------
 install -d -o "$APP_USER" -g "$APP_USER" -m 755 /var/lib/efirelle/uploads
+id -u mediamtx >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin mediamtx
+install -d -o mediamtx -g mediamtx -m 755 /var/lib/efirelle/recordings
 
 # --- MediaMTX: приём эфиров по RTMP и раздача HLS ------------------------------
 if [ ! -x /usr/local/bin/mediamtx ]; then
@@ -77,8 +79,6 @@ if [ ! -x /usr/local/bin/mediamtx ]; then
   fi
   rm -f /tmp/mediamtx.tar.gz
 fi
-id -u mediamtx >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin mediamtx
-
 mkdir -p /etc/mediamtx
 cat >/etc/mediamtx/mediamtx.yml.new <<'EOF'
 # MediaMTX для Efirelle. Автор публикует rtmp://efirelle.ru/live с ключом «<канал>?key=<секрет>»,
@@ -98,6 +98,16 @@ hlsVariant: lowLatency
 hlsSegmentCount: 7
 hlsSegmentDuration: 1s
 hlsPartDuration: 200ms
+# Записи эфиров (для «Записей» и клипов): хранятся 3 дня, отдаются сервером воспроизведения.
+playback: yes
+playbackAddress: 127.0.0.1:9996
+pathDefaults:
+  record: yes
+  recordPath: /var/lib/efirelle/recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+  recordFormat: fmp4
+  recordPartDuration: 1s
+  recordSegmentDuration: 10m
+  recordDeleteAfter: 72h
 authMethod: http
 authHTTPAddress: http://127.0.0.1:4000/api/internal/media/auth
 authHTTPExclude:
@@ -195,6 +205,13 @@ location /media/ {
     expires 30d;
     add_header Cache-Control "public, immutable";
     add_header X-Content-Type-Options nosniff;
+}
+# Записи эфиров: только выдача отрезка (/get), список файлов наружу не нужен.
+location = /playback/get {
+    proxy_pass http://127.0.0.1:9996/get$is_args$args;
+    proxy_http_version 1.1;
+    proxy_buffering off;
+    proxy_read_timeout 1h;
 }
 location /hls/ {
     proxy_pass http://127.0.0.1:8888/;

@@ -6,6 +6,7 @@ import type { ChatService } from "../chat/service.js";
 import type { MomentService } from "../moments/service.js";
 import type { PredictionService } from "../predictions/service.js";
 import type { ProfileService } from "../profile/service.js";
+import type { RecordingService } from "../recordings/service.js";
 import type { ScheduleService } from "../schedule/service.js";
 import type { ChannelRepository, ChannelRow } from "./repository.js";
 
@@ -22,9 +23,10 @@ export function registerChannelRoutes(
     chat: ChatService;
     profile: ProfileService;
     schedule: ScheduleService;
+    recordings: RecordingService;
   },
 ): void {
-  const { moments, predictions, chat, profile, schedule } = services;
+  const { moments, predictions, chat, profile, schedule, recordings } = services;
   async function channelOr404(slug: string): Promise<ChannelRow> {
     const channel = await channels.bySlug(slug);
     if (!channel) throw notFound("Канал не найден");
@@ -55,6 +57,8 @@ export function registerChannelRoutes(
       about: await profile.about(channel.id),
       emotes: await profile.emotes(channel.id),
       schedule: await schedule.ofChannel(channel.id, viewerId),
+      recordings: await recordings.recordings(channel),
+      clips: await recordings.clipsOfChannel(channel.id),
     };
   });
 

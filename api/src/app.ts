@@ -20,6 +20,8 @@ import { registerPredictionRoutes } from "./modules/predictions/routes.js";
 import { registerProfileRoutes } from "./modules/profile/routes.js";
 import { ProfileService } from "./modules/profile/service.js";
 import { registerPushRoutes } from "./modules/push/routes.js";
+import { registerRecordingRoutes } from "./modules/recordings/routes.js";
+import { RecordingService } from "./modules/recordings/service.js";
 import { PushService } from "./modules/push/service.js";
 import { PredictionService } from "./modules/predictions/service.js";
 import { registerScheduleRoutes } from "./modules/schedule/routes.js";
@@ -32,6 +34,7 @@ export interface Services {
   live: LiveService;
   push: PushService;
   schedule: ScheduleService;
+  recordings: RecordingService;
 }
 
 /** Собирает приложение: плагины, определение пользователя, все модули. Используется сервером и тестами. */
@@ -87,11 +90,12 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   const live = new LiveService(ctx, push);
   const profile = new ProfileService(ctx);
   const schedule = new ScheduleService(ctx, channels, push);
+  const recordings = new RecordingService(ctx, channels);
 
   app.get("/api/health", async () => ({ ok: true }));
   registerAuthRoutes(app, ctx);
-  registerDiscoveryRoutes(app, ctx, channels, moments, schedule);
-  registerChannelRoutes(app, ctx, channels, { moments, predictions, chat, profile, schedule });
+  registerDiscoveryRoutes(app, ctx, channels, moments, schedule, recordings);
+  registerChannelRoutes(app, ctx, channels, { moments, predictions, chat, profile, schedule, recordings });
   registerChatRoutes(app, ctx, channels, chat);
   registerPredictionRoutes(app, predictions);
   registerStudioRoutes(app, ctx, channels, { predictions, moments, chat, profile, schedule });
@@ -100,7 +104,8 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   registerPushRoutes(app, ctx, push);
   registerProfileRoutes(app, ctx, profile);
   registerScheduleRoutes(app, schedule);
+  registerRecordingRoutes(app, channels, recordings);
   app.addHook("onClose", async () => push.close());
 
-  return { app, services: { live, push, schedule } };
+  return { app, services: { live, push, schedule, recordings } };
 }
