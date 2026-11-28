@@ -5,6 +5,7 @@ import { notFound, parse } from "../../lib/http.js";
 import { escapeLike, normalizeQuery } from "../../lib/text.js";
 import type { ChannelRepository, StreamDto } from "../channels/repository.js";
 import type { MomentService } from "../moments/service.js";
+import type { ScheduleService } from "../schedule/service.js";
 
 interface CategoryRow {
   id: string;
@@ -29,7 +30,13 @@ const liveQuery = z.object({
 });
 
 /** Витрина: главная, идущие эфиры, категории, поиск. Всё доступно без входа. */
-export function registerDiscoveryRoutes(app: FastifyInstance, ctx: AppContext, channels: ChannelRepository, moments: MomentService): void {
+export function registerDiscoveryRoutes(
+  app: FastifyInstance,
+  ctx: AppContext,
+  channels: ChannelRepository,
+  moments: MomentService,
+  schedule: ScheduleService,
+): void {
   async function categories(live: StreamDto[]): Promise<CategoryDto[]> {
     const rows = await ctx.db.rows<CategoryRow>("SELECT id, name, group_name, tone FROM categories ORDER BY position");
     return rows
@@ -55,6 +62,7 @@ export function registerDiscoveryRoutes(app: FastifyInstance, ctx: AppContext, c
       moments: await moments.live(),
       categories: await categories(live),
       forYou: live,
+      upcoming: await schedule.upcoming(request.viewer?.id ?? null),
     };
   });
 

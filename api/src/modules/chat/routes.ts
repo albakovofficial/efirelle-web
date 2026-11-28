@@ -7,8 +7,9 @@ import { requireViewer } from "../auth/sessions.js";
 import type { ChannelRepository } from "../channels/repository.js";
 import { MAX_MESSAGE_LENGTH, REPORT_REASONS, type ChatService } from "./service.js";
 
-const clientMessage = z.object({ type: z.literal("send"), text: z.string().max(MAX_MESSAGE_LENGTH * 2) });
-const sendBody = z.object({ text: z.string().max(MAX_MESSAGE_LENGTH * 2) });
+const replyTo = z.string().regex(/^\d{1,18}$/).optional();
+const clientMessage = z.object({ type: z.literal("send"), text: z.string().max(MAX_MESSAGE_LENGTH * 2), replyTo });
+const sendBody = z.object({ text: z.string().max(MAX_MESSAGE_LENGTH * 2), replyTo });
 const reportBody = z.object({ reason: z.enum(REPORT_REASONS, { message: "Выберите причину жалобы" }) });
 const blockParams = z.object({ username: z.string().trim().toLowerCase().max(24) });
 
@@ -28,9 +29,9 @@ export function registerChatRoutes(app: FastifyInstance, ctx: AppContext, channe
     const viewer = requireViewer(request);
     const channel = await channels.bySlug(request.params.slug);
     if (!channel) throw notFound("Канал не найден");
-    const { text } = parse(sendBody, request.body);
+    const { text, replyTo: replyToId } = parse(sendBody, request.body);
     reply.code(201);
-    return { message: await chat.send(viewer, channel.id, text) };
+    return { message: await chat.send(viewer, channel.id, text, replyToId) };
   });
 
   /**
@@ -59,7 +60,7 @@ export function registerChatRoutes(app: FastifyInstance, ctx: AppContext, channe
       }
       try {
         const payload = parse(clientMessage, JSON.parse(String(data)));
-        await chat.send(viewer, channel.id, payload.text);
+        await chat.send(viewer, channel.id, payload.text, payload.replyTo);
       } catch (error) {
         const message = error instanceof HttpError ? error.message : "Не удалось отправить сообщение";
         send(socket, { type: "error", message });

@@ -63,6 +63,9 @@ EOF
   step "Настройки API записаны в $API_ENV"
 fi
 
+# --- Картинки пользователей и записи эфиров -------------------------------------
+install -d -o "$APP_USER" -g "$APP_USER" -m 755 /var/lib/efirelle/uploads
+
 # --- MediaMTX: приём эфиров по RTMP и раздача HLS ------------------------------
 if [ ! -x /usr/local/bin/mediamtx ]; then
   URL=$(curl -fsS https://api.github.com/repos/bluenviron/mediamtx/releases/latest \
@@ -184,7 +187,14 @@ location /api/ {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $efirelle_connection;
     proxy_read_timeout 1h;
-    client_max_body_size 64k;
+    client_max_body_size 5m;
+}
+# Аватары, баннеры и эмодзи: файлы с неизменными именами — кэшируются надолго.
+location /media/ {
+    alias /var/lib/efirelle/uploads/;
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+    add_header X-Content-Type-Options nosniff;
 }
 location /hls/ {
     proxy_pass http://127.0.0.1:8888/;

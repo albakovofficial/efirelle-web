@@ -1,6 +1,7 @@
 import type { Config } from "./config.js";
 import type { Database } from "./db/database.js";
 import type { Mailer } from "./lib/mailer.js";
+import type { Uploads } from "./lib/uploads.js";
 import type { PushSender } from "./modules/push/apns.js";
 import type { ChatHub } from "./realtime/hub.js";
 
@@ -10,6 +11,7 @@ export interface AppContext {
   db: Database;
   hub: ChatHub;
   mailer: Mailer;
+  uploads: Uploads;
   /** Подмена отправки уведомлений в тестах; в работе — `undefined`, используется APNs. */
   pushTransport?: PushSender;
 }
@@ -23,5 +25,6 @@ export interface Viewer {
   role: "user" | "admin";
   tone: string;
   sparks: number;
+  avatarUrl: string | null;
   createdAt: Date;
 }

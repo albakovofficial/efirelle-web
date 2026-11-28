@@ -1,18 +1,23 @@
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
-import { buildApp } from "../src/app.js";
+import { buildApp, type Services } from "../src/app.js";
 import type { Config } from "../src/config.js";
 import type { AppContext } from "../src/context.js";
 import { Database } from "../src/db/database.js";
 import { migrate } from "../src/db/migrate.js";
 import type { Mail, Mailer } from "../src/lib/mailer.js";
-import { ChatHub } from "../src/realtime/hub.js";
+import { Uploads } from "../src/lib/uploads.js";
 import type { LiveService } from "../src/modules/media/service.js";
 import type { PushDevice, PushMessage, PushResult, PushSender } from "../src/modules/push/apns.js";
+import { ChatHub } from "../src/realtime/hub.js";
 
 export interface TestApp {
   app: FastifyInstance;
   ctx: AppContext;
   live: LiveService;
+  services: Services;
   mails: Mail[];
   /** Уведомления, «отправленные» в APNs. */
   pushes: { device: PushDevice; message: PushMessage }[];
@@ -46,6 +51,9 @@ export async function createTestApp(): Promise<TestApp> {
     mediaApiUrl: "http://127.0.0.1:1",
     adminEmails: new Set(["admin@efirelle.test"]),
     smtp: null,
+    uploadDir: mkdtempSync(join(tmpdir(), "efirelle-uploads-")),
+    recordingsDir: mkdtempSync(join(tmpdir(), "efirelle-recordings-")),
+    playbackUrl: "http://127.0.0.1:1",
     isProduction: false,
   };
   const pushes: TestApp["pushes"] = [];
@@ -57,13 +65,14 @@ export async function createTestApp(): Promise<TestApp> {
     },
     close() {},
   };
-  const ctx: AppContext = { config, db, hub: new ChatHub(), mailer, pushTransport };
+  const ctx: AppContext = { config, db, hub: new ChatHub(), mailer, pushTransport, uploads: new Uploads(config.uploadDir, config.publicUrl) };
   const { app, services } = await buildApp(ctx);
   await app.ready();
   return {
     app,
     ctx,
     live: services.live,
+    services,
     mails,
     pushes,
     pushResults,

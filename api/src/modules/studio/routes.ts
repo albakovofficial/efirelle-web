@@ -9,6 +9,8 @@ import type { ChannelRepository } from "../channels/repository.js";
 import type { ChatService } from "../chat/service.js";
 import type { MomentService } from "../moments/service.js";
 import type { PredictionService } from "../predictions/service.js";
+import type { ProfileService } from "../profile/service.js";
+import type { ScheduleService } from "../schedule/service.js";
 
 const cleanText = (max: number, message: string) =>
   z
@@ -41,10 +43,15 @@ export function registerStudioRoutes(
   app: FastifyInstance,
   ctx: AppContext,
   channels: ChannelRepository,
-  predictions: PredictionService,
-  moments: MomentService,
-  chat: ChatService,
+  services: {
+    predictions: PredictionService;
+    moments: MomentService;
+    chat: ChatService;
+    profile: ProfileService;
+    schedule: ScheduleService;
+  },
 ): void {
+  const { predictions, moments, chat, profile, schedule } = services;
   app.get("/api/studio", async (request) => {
     const viewer = requireViewer(request);
     const channel = await channels.byId(viewer.id);
@@ -65,6 +72,9 @@ export function registerStudioRoutes(
       },
       prediction: await predictions.current(viewer.id, viewer.id),
       bans: bans.map((b) => ({ slug: b.username, name: b.display_name, until: b.until?.toISOString() ?? null })),
+      about: await profile.about(viewer.id),
+      emotes: await profile.emotes(viewer.id),
+      schedule: await schedule.ofChannel(viewer.id, viewer.id),
     };
   });
 

@@ -14,10 +14,11 @@ interface ViewerRow {
   role: "user" | "admin";
   tone: string;
   sparks: number;
+  avatar_url: string | null;
   created_at: Date;
 }
 
-const VIEWER_COLUMNS = "u.id, u.email, u.username, u.display_name, u.role, u.tone, u.sparks, u.created_at";
+const VIEWER_COLUMNS = "u.id, u.email, u.username, u.display_name, u.role, u.tone, u.sparks, u.avatar_url, u.created_at";
 
 function toViewer(row: ViewerRow): Viewer {
   return {
@@ -28,6 +29,7 @@ function toViewer(row: ViewerRow): Viewer {
     role: row.role,
     tone: row.tone,
     sparks: row.sparks,
+    avatarUrl: row.avatar_url,
     createdAt: row.created_at,
   };
 }

@@ -5,6 +5,8 @@ import { requireViewer } from "../auth/sessions.js";
 import type { ChatService } from "../chat/service.js";
 import type { MomentService } from "../moments/service.js";
 import type { PredictionService } from "../predictions/service.js";
+import type { ProfileService } from "../profile/service.js";
+import type { ScheduleService } from "../schedule/service.js";
 import type { ChannelRepository, ChannelRow } from "./repository.js";
 
 type SlugParams = { Params: { slug: string } };
@@ -14,10 +16,15 @@ export function registerChannelRoutes(
   app: FastifyInstance,
   ctx: AppContext,
   channels: ChannelRepository,
-  moments: MomentService,
-  predictions: PredictionService,
-  chat: ChatService,
+  services: {
+    moments: MomentService;
+    predictions: PredictionService;
+    chat: ChatService;
+    profile: ProfileService;
+    schedule: ScheduleService;
+  },
 ): void {
+  const { moments, predictions, chat, profile, schedule } = services;
   async function channelOr404(slug: string): Promise<ChannelRow> {
     const channel = await channels.bySlug(slug);
     if (!channel) throw notFound("Канал не найден");
@@ -34,7 +41,7 @@ export function registerChannelRoutes(
     };
   });
 
-  /** Всё для страницы эфира одним запросом: канал, отметки, прогноз, история чата. */
+  /** Всё для страницы канала одним запросом: эфир, оформление, расписание, отметки, прогноз, чат. */
   app.get<SlugParams>("/api/channels/:slug/watch", async (request) => {
     const channel = await channelOr404(request.params.slug);
     const viewerId = request.viewer?.id ?? null;
@@ -45,6 +52,9 @@ export function registerChannelRoutes(
       markers: await moments.ofCurrentSession(channel.id),
       prediction: await predictions.current(channel.id, viewerId),
       chat: await chat.history(channel.id, viewerId),
+      about: await profile.about(channel.id),
+      emotes: await profile.emotes(channel.id),
+      schedule: await schedule.ofChannel(channel.id, viewerId),
     };
   });
 

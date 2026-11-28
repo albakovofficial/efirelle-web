@@ -20,6 +20,8 @@ export interface ChatMessageDto {
   tone: string;
   badge?: ChatBadgeDto;
   text: string;
+  /** Ответ на сообщение: кому и начало исходного текста. */
+  replyTo?: { id: string; author: string; text: string };
   createdAt: string;
 }
 
@@ -34,12 +36,21 @@ interface MessageRow {
   tone: string;
   role: "user" | "admin";
   user_created_at: Date;
+  reply_id: string | null;
+  reply_author: string | null;
+  reply_text: string | null;
 }
 
 const MESSAGE_SELECT = `
   SELECT m.id::text, m.channel_id, m.user_id, m.text, m.created_at,
-         u.username, u.display_name, u.tone, u.role, u.created_at AS user_created_at
-  FROM chat_messages m JOIN users u ON u.id = m.user_id`;
+         u.username, u.display_name, u.tone, u.role, u.created_at AS user_created_at,
+         r.id::text AS reply_id, ru.display_name AS reply_author, r.text AS reply_text
+  FROM chat_messages m JOIN users u ON u.id = m.user_id
+  LEFT JOIN chat_messages r ON r.id = m.reply_to_id AND r.deleted_at IS NULL
+  LEFT JOIN users ru ON ru.id = r.user_id`;
+
+/** Сколько символов исходного сообщения показывать над ответом. */
+const REPLY_PREVIEW_LENGTH = 80;
 
 export const REPORT_REASONS = ["spam", "harassment", "hate", "sexual", "violence", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
@@ -64,7 +75,7 @@ export class ChatService {
     return rows.reverse().map((row) => this.toDto(row));
   }
 
-  async send(viewer: Viewer, channelId: string, rawText: string): Promise<ChatMessageDto> {
+  async send(viewer: Viewer, channelId: string, rawText: string, replyToId?: string): Promise<ChatMessageDto> {
     const text = rawText.trim();
     if (!text) throw badRequest("Пустое сообщение");
     if (text.length > MAX_MESSAGE_LENGTH) throw badRequest(`Сообщение — до ${MAX_MESSAGE_LENGTH} символов`);
@@ -76,13 +87,24 @@ export class ChatService {
     );
     if (ban) throw new HttpError(403, "Вам запрещено писать в этом чате", "chat_banned");
 
+    // Отвечать можно только на живое сообщение этого же чата.
+    let replyTo: string | null = null;
+    if (replyToId) {
+      const original = await this.ctx.db.one<{ id: string }>(
+        "SELECT id::text FROM chat_messages WHERE id = $1 AND channel_id = $2 AND deleted_at IS NULL",
+        [replyToId, channelId],
+      );
+      if (!original) throw badRequest("Сообщение, на которое вы отвечаете, удалено");
+      replyTo = original.id;
+    }
+
     const now = Date.now();
     if (now - (this.lastMessageAt.get(viewer.id) ?? 0) < MESSAGE_INTERVAL_MS) throw tooManyRequests("Не так быстро");
 
     this.lastMessageAt.set(viewer.id, now);
     const inserted = await this.ctx.db.one<{ id: string }>(
-      "INSERT INTO chat_messages (channel_id, user_id, text) VALUES ($1, $2, $3) RETURNING id::text",
-      [channelId, viewer.id, text],
+      "INSERT INTO chat_messages (channel_id, user_id, text, reply_to_id) VALUES ($1, $2, $3, $4) RETURNING id::text",
+      [channelId, viewer.id, text, replyTo],
     );
     const message = await this.byId(inserted!.id);
     this.ctx.hub.broadcast(channelId, { type: "message", message }, viewer.id);
@@ -181,6 +203,9 @@ export class ChatService {
       tone: row.tone,
       ...(badge ? { badge } : {}),
       text: row.text,
+      ...(row.reply_id && row.reply_author && row.reply_text
+        ? { replyTo: { id: row.reply_id, author: row.reply_author, text: row.reply_text.slice(0, REPLY_PREVIEW_LENGTH) } }
+        : {}),
       createdAt: row.created_at.toISOString(),
     };
   }

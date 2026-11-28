@@ -4,6 +4,7 @@ import websocket from "@fastify/websocket";
 import Fastify, { type FastifyInstance } from "fastify";
 import type { AppContext } from "./context.js";
 import { forbidden, HttpError } from "./lib/http.js";
+import { IMAGE_CONTENT_TYPES } from "./lib/uploads.js";
 import { registerAdminRoutes } from "./modules/admin/routes.js";
 import { registerAuthRoutes } from "./modules/auth/routes.js";
 import { findViewer, sessionToken } from "./modules/auth/sessions.js";
@@ -16,9 +17,13 @@ import { registerMediaRoutes } from "./modules/media/routes.js";
 import { LiveService } from "./modules/media/service.js";
 import { MomentService } from "./modules/moments/service.js";
 import { registerPredictionRoutes } from "./modules/predictions/routes.js";
+import { registerProfileRoutes } from "./modules/profile/routes.js";
+import { ProfileService } from "./modules/profile/service.js";
 import { registerPushRoutes } from "./modules/push/routes.js";
 import { PushService } from "./modules/push/service.js";
 import { PredictionService } from "./modules/predictions/service.js";
+import { registerScheduleRoutes } from "./modules/schedule/routes.js";
+import { ScheduleService } from "./modules/schedule/service.js";
 import { registerStudioRoutes } from "./modules/studio/routes.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -26,6 +31,7 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 export interface Services {
   live: LiveService;
   push: PushService;
+  schedule: ScheduleService;
 }
 
 /** Собирает приложение: плагины, определение пользователя, все модули. Используется сервером и тестами. */
@@ -42,6 +48,10 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   await app.register(rateLimit, { global: false });
 
   app.decorateRequest("viewer", null);
+  // Картинки (аватар, баннер, эмодзи) приходят телом запроса как есть; формат проверяется по содержимому.
+  app.addContentTypeParser(IMAGE_CONTENT_TYPES, { parseAs: "buffer", bodyLimit: 4 * 1024 * 1024 }, (_request, body, done) => {
+    done(null, body);
+  });
 
   app.addHook("onRequest", async (request) => {
     const session = sessionToken(request);
@@ -75,18 +85,22 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   const chat = new ChatService(ctx, moments);
   const push = new PushService(ctx);
   const live = new LiveService(ctx, push);
+  const profile = new ProfileService(ctx);
+  const schedule = new ScheduleService(ctx, channels, push);
 
   app.get("/api/health", async () => ({ ok: true }));
   registerAuthRoutes(app, ctx);
-  registerDiscoveryRoutes(app, ctx, channels, moments);
-  registerChannelRoutes(app, ctx, channels, moments, predictions, chat);
+  registerDiscoveryRoutes(app, ctx, channels, moments, schedule);
+  registerChannelRoutes(app, ctx, channels, { moments, predictions, chat, profile, schedule });
   registerChatRoutes(app, ctx, channels, chat);
   registerPredictionRoutes(app, predictions);
-  registerStudioRoutes(app, ctx, channels, predictions, moments, chat);
+  registerStudioRoutes(app, ctx, channels, { predictions, moments, chat, profile, schedule });
   registerAdminRoutes(app, ctx);
   registerMediaRoutes(app, live);
   registerPushRoutes(app, ctx, push);
+  registerProfileRoutes(app, ctx, profile);
+  registerScheduleRoutes(app, schedule);
   app.addHook("onClose", async () => push.close());
 
-  return { app, services: { live, push } };
+  return { app, services: { live, push, schedule } };
 }

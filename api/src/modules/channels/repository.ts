@@ -9,6 +9,7 @@ export interface ChannelRow {
   username: string;
   display_name: string;
   tone: string;
+  avatar_url: string | null;
   title: string;
   category_id: string;
   category_name: string;
@@ -24,6 +25,7 @@ export interface ChannelDto {
   name: string;
   initials: string;
   tone: string;
+  avatarUrl: string | null;
   followers: number;
   verified: boolean;
 }
@@ -50,7 +52,7 @@ export interface ChannelStatusDto {
 }
 
 const SELECT = `
-  SELECT u.id, u.username, u.display_name, u.tone,
+  SELECT u.id, u.username, u.display_name, u.tone, u.avatar_url,
          c.title, c.category_id, cat.name AS category_name, cat.tone AS category_tone, c.tags,
          c.live_since, c.current_session_id::text AS current_session_id,
          (SELECT count(*) FROM follows f WHERE f.channel_id = u.id)::int AS followers
@@ -73,6 +75,7 @@ export class ChannelRepository {
       name: row.display_name,
       initials: initials(row.display_name),
       tone: row.tone,
+      avatarUrl: row.avatar_url,
       followers: row.followers,
       verified: false,
     };

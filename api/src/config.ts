@@ -14,6 +14,11 @@ export interface Config {
   /** Почты, которые при регистрации получают роль администратора. */
   adminEmails: Set<string>;
   smtp: SmtpConfig | null;
+  /** Папка для картинок пользователей; nginx раздаёт её по /media/. */
+  uploadDir: string;
+  /** Папка записей эфиров MediaMTX и адрес его сервера воспроизведения записей. */
+  recordingsDir: string;
+  playbackUrl: string;
   isProduction: boolean;
 }
 
@@ -63,6 +68,9 @@ export function loadConfig(): Config {
         .filter(Boolean),
     ),
     smtp: readSmtp(),
+    uploadDir: process.env.UPLOAD_DIR ?? "/var/lib/efirelle/uploads",
+    recordingsDir: process.env.RECORDINGS_DIR ?? "/var/lib/efirelle/recordings",
+    playbackUrl: process.env.PLAYBACK_URL ?? "http://127.0.0.1:9996",
     isProduction: process.env.NODE_ENV === "production",
   };
 }

@@ -77,6 +77,17 @@ export class PushService {
     });
   }
 
+  /** Уведомление выбранным пользователям (напоминания о запланированных эфирах). */
+  async notifyUsers(userIds: string[], message: PushMessage): Promise<number> {
+    if (userIds.length === 0) return 0;
+    const devices = await this.ctx.db.rows<PushDevice>(
+      `SELECT d.token, d.environment FROM devices d JOIN users u ON u.id = d.user_id
+       WHERE d.user_id = ANY($1::uuid[]) AND u.banned_at IS NULL`,
+      [userIds],
+    );
+    return this.send(devices, message);
+  }
+
   /** Проверочное уведомление на свои устройства — из админки. */
   async sendTest(userId: string, channel: string): Promise<{ devices: number; sent: number }> {
     const devices = await this.ctx.db.rows<PushDevice>("SELECT token, environment FROM devices WHERE user_id = $1", [userId]);
