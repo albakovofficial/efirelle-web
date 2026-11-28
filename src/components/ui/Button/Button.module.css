@@ -35,10 +35,6 @@
 .dark { background: var(--color-ink); color: var(--color-on-dark); }
 .dark:hover { background: #2a2833; }
 
-/* «В эфир» — красный, как метка прямого эфира. */
-.live { background: var(--color-live); color: var(--color-on-dark); }
-.live:hover { background: #bf2731; }
-
 .secondary { background: var(--color-surface); border-color: var(--color-line); color: var(--color-ink); }
 .secondary:hover { background: var(--color-surface-muted); }
 

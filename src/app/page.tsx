@@ -1,7 +1,7 @@
 import { CategoryCard } from "@/components/category/CategoryCard/CategoryCard";
 import { ClipCard } from "@/components/clips/ClipCard/ClipCard";
 import { FeaturedHero } from "@/components/home/FeaturedHero/FeaturedHero";
-import { GoLiveBanner } from "@/components/home/GoLiveBanner/GoLiveBanner";
+import { QuietBanner } from "@/components/home/QuietBanner/QuietBanner";
 import { StreamsForYou } from "@/components/home/StreamsForYou/StreamsForYou";
 import { FollowingSidebar } from "@/components/layout/FollowingSidebar/FollowingSidebar";
 import { PageShell } from "@/components/layout/PageShell/PageShell";
@@ -13,7 +13,7 @@ import { Section } from "@/components/ui/Section/Section";
 import { getCurrentViewer, getHomeFeed } from "@/data/api";
 
 /**
- * Главная: отслеживаемые каналы в эфире, витрина (или приглашение в эфир), категории-обложки,
+ * Главная: отслеживаемые каналы в эфире, витрина (или «Эфиров сейчас нет»), категории-обложки,
  * анонсы, живые моменты, клипы и персональная лента.
  */
 export default async function HomePage() {
@@ -35,7 +35,7 @@ export default async function HomePage() {
         </Section>
       )}
 
-      {mainStream ? <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} /> : <GoLiveBanner />}
+      {mainStream ? <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} /> : <QuietBanner />}
 
       <Section id="categories" title="Категории" action={{ label: "Смотреть все", href: "/browse" }}>
         <AutoGrid min={150}>
