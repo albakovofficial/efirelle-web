@@ -12,7 +12,7 @@ const deviceBody = z.object({
 });
 const pushToken = z.string().trim().toLowerCase().regex(/^[0-9a-f]{32,400}$/, "Некорректный токен");
 /** Токен запуска Live Activity; `null` — пользователь выключил Live Activities для приложения. */
-const activityStartBody = z.object({ startToken: pushToken.nullable() });
+const activityStartBody = z.object({ startToken: pushToken.nullish() });
 const activityBody = z.object({
   token: pushToken,
   channel: z.string().trim().toLowerCase(),
@@ -51,7 +51,7 @@ export function registerPushRoutes(app: FastifyInstance, ctx: AppContext, push: 
     const viewer = requireViewer(request);
     const { startToken } = parse(activityStartBody, request.body);
     const updated = await ctx.db.pool.query("UPDATE devices SET activity_start_token = $1 WHERE token = $2 AND user_id = $3", [
-      startToken,
+      startToken ?? null,
       request.params.token.toLowerCase(),
       viewer.id,
     ]);
