@@ -33,14 +33,14 @@ describe("Live Activities", () => {
       method: "PUT",
       url: `/api/me/devices/${token("a")}/live-activity`,
       headers: auth(other),
-      payload: { startToken: token("s") },
+      payload: { startToken: token("e") },
     });
     assert.equal(foreign.statusCode, 404);
     const own = await t.app.inject({
       method: "PUT",
       url: `/api/me/devices/${token("a")}/live-activity`,
       headers: auth(fan),
-      payload: { startToken: token("s") },
+      payload: { startToken: token("e") },
     });
     assert.equal(own.statusCode, 200);
   });
@@ -50,7 +50,7 @@ describe("Live Activities", () => {
     await waitFor(() => t.pushes.length > 0);
     assert.equal(t.pushes.length, 1);
     const [{ device, push }] = t.pushes as [(typeof t.pushes)[number]];
-    assert.equal(device.token, token("s"));
+    assert.equal(device.token, token("e"));
     assert.equal(push.type, "liveactivity");
     assert.equal(push.payload.aps.event, "start");
     assert.equal(push.payload.aps["attributes-type"], "LiveStreamAttributes");
