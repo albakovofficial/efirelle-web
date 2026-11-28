@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { forbidden, parse, unauthorized } from "../../lib/http.js";
 import { usernameFromPath, type LiveService } from "./service.js";
+import { variantFromPath, type Transcoder } from "./transcoder.js";
 
 /**
  * Запрос MediaMTX при подключении (authMethod: http). publish — автор выходит в эфир,
@@ -19,12 +20,18 @@ function requireLocal(request: FastifyRequest): void {
   if (request.ip !== "127.0.0.1" && request.ip !== "::1" && request.ip !== "::ffff:127.0.0.1") throw forbidden();
 }
 
-export function registerMediaRoutes(app: FastifyInstance, live: LiveService): void {
+export function registerMediaRoutes(app: FastifyInstance, live: LiveService, transcoder: Transcoder): void {
   app.post("/api/internal/media/auth", async (request, reply) => {
     requireLocal(request);
     const body = parse(authBody, request.body);
     if (body.action === "read" || body.action === "playback") return reply.code(200).send();
     if (body.action !== "publish") throw unauthorized();
+
+    // Перекодированные качества публикует только наш ffmpeg — с внутренним ключом.
+    if (variantFromPath(body.path)) {
+      if (new URLSearchParams(body.query).get("key") !== transcoder.internalKey) throw unauthorized();
+      return reply.code(200).send();
+    }
 
     const username = usernameFromPath(body.path);
     const key = new URLSearchParams(body.query).get("key");

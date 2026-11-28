@@ -2,6 +2,7 @@ import type { Config } from "../../config.js";
 import type { Database, Queryable } from "../../db/database.js";
 import { initials } from "../../lib/text.js";
 import type { ChatHub } from "../../realtime/hub.js";
+import { VARIANTS, type Transcoder } from "../media/transcoder.js";
 
 /** Строка канала вместе с владельцем и категорией. */
 export interface ChannelRow {
@@ -44,6 +45,8 @@ export interface StreamDto {
   status: string;
   tone: string;
   playbackUrl: string;
+  /** Доступные качества; первое — исходное. 720p и 480p — только когда идёт перекодирование. */
+  qualities: { label: string; url: string }[];
 }
 
 export interface ChannelStatusDto {
@@ -67,6 +70,7 @@ export class ChannelRepository {
     private readonly db: Database,
     private readonly hub: ChatHub,
     private readonly config: Config,
+    private readonly transcoder: Transcoder,
   ) {}
 
   toChannel(row: ChannelRow): ChannelDto {
@@ -98,6 +102,12 @@ export class ChannelRepository {
       status: title,
       tone: row.category_tone,
       playbackUrl: `${this.config.publicUrl}/hls/live/${row.username}/index.m3u8`,
+      qualities: [
+        { label: "Источник", url: `${this.config.publicUrl}/hls/live/${row.username}/index.m3u8` },
+        ...(this.transcoder.isActive(row.username)
+          ? VARIANTS.map((v) => ({ label: v.label, url: `${this.config.publicUrl}/hls/variants/${row.username}/${v.name}/index.m3u8` }))
+          : []),
+      ],
     };
   }
 

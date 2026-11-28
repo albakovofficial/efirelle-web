@@ -15,6 +15,7 @@ import { ChatService } from "./modules/chat/service.js";
 import { registerDiscoveryRoutes } from "./modules/discovery/routes.js";
 import { registerMediaRoutes } from "./modules/media/routes.js";
 import { LiveService } from "./modules/media/service.js";
+import { Transcoder } from "./modules/media/transcoder.js";
 import { MomentService } from "./modules/moments/service.js";
 import { registerPredictionRoutes } from "./modules/predictions/routes.js";
 import { registerProfileRoutes } from "./modules/profile/routes.js";
@@ -82,12 +83,13 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
     return reply.code(500).send({ error: "internal", message: "Что-то пошло не так. Попробуйте ещё раз" });
   });
 
-  const channels = new ChannelRepository(ctx.db, ctx.hub, ctx.config);
+  const transcoder = new Transcoder(ctx);
+  const channels = new ChannelRepository(ctx.db, ctx.hub, ctx.config, transcoder);
   const moments = new MomentService(ctx, channels);
   const predictions = new PredictionService(ctx, moments);
   const chat = new ChatService(ctx, moments);
   const push = new PushService(ctx);
-  const live = new LiveService(ctx, push);
+  const live = new LiveService(ctx, push, transcoder);
   const profile = new ProfileService(ctx);
   const schedule = new ScheduleService(ctx, channels, push);
   const recordings = new RecordingService(ctx, channels);
@@ -99,13 +101,16 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   registerChatRoutes(app, ctx, channels, chat);
   registerPredictionRoutes(app, predictions);
   registerStudioRoutes(app, ctx, channels, { predictions, moments, chat, profile, schedule });
-  registerAdminRoutes(app, ctx);
-  registerMediaRoutes(app, live);
+  registerAdminRoutes(app, ctx, transcoder);
+  registerMediaRoutes(app, live, transcoder);
   registerPushRoutes(app, ctx, push);
   registerProfileRoutes(app, ctx, profile);
   registerScheduleRoutes(app, schedule);
   registerRecordingRoutes(app, channels, recordings);
-  app.addHook("onClose", async () => push.close());
+  app.addHook("onClose", async () => {
+    push.close();
+    transcoder.stopAll();
+  });
 
   return { app, services: { live, push, schedule, recordings } };
 }

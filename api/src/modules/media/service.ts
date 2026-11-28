@@ -1,5 +1,6 @@
 import type { AppContext } from "../../context.js";
 import type { PushService } from "../push/service.js";
+import type { Transcoder } from "./transcoder.js";
 
 /** Эфиры приходят в медиасервер по адресу live/<имя канала>. */
 const PATH_PATTERN = /^live\/([a-z0-9_]{3,24})$/;
@@ -13,6 +14,7 @@ export class LiveService {
   constructor(
     private readonly ctx: AppContext,
     private readonly push: PushService,
+    private readonly transcoder: Transcoder,
   ) {}
 
   /** Проверка ключа при подключении OBS. */
@@ -42,6 +44,8 @@ export class LiveService {
       await client.query("UPDATE channels SET live_since = now(), current_session_id = $1 WHERE user_id = $2", [session!.id, channel.user_id]);
       return channel.user_id;
     });
+    // После перезапуска API эфир уже числится идущим — перекодирование всё равно нужно поднять.
+    await this.transcoder.start(username);
     if (!channelId) return;
     this.ctx.hub.broadcast(channelId, { type: "live", live: true });
     // Уведомления не задерживают ответ медиасерверу: ошибка APNs эфир не ломает.
@@ -49,6 +53,7 @@ export class LiveService {
   }
 
   async stop(username: string): Promise<void> {
+    this.transcoder.stop(username);
     const row = await this.ctx.db.one<{ user_id: string }>(
       `WITH ended AS (
          UPDATE stream_sessions s SET ended_at = now()

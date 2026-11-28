@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { AppContext } from "../../context.js";
 import { notFound, parse } from "../../lib/http.js";
 import { requireAdmin } from "../auth/sessions.js";
+import type { Transcoder } from "../media/transcoder.js";
 
 const resolveBody = z.object({
   action: z.enum(["dismiss", "delete_message", "ban_user"], { message: "Выберите действие" }),
@@ -22,7 +23,22 @@ interface ReportRow {
 }
 
 /** Модерация платформы: жалобы рассматриваются администратором (по правилам — в течение 24 часов). */
-export function registerAdminRoutes(app: FastifyInstance, ctx: AppContext): void {
+const transcodeBody = z.object({ enabled: z.boolean() });
+
+export function registerAdminRoutes(app: FastifyInstance, ctx: AppContext, transcoder: Transcoder): void {
+  /** Перекодирование в 720p/480p: нагружает процессор, поэтому включается вручную. */
+  app.get("/api/admin/transcode", async (request) => {
+    requireAdmin(request);
+    return { enabled: await transcoder.isEnabled() };
+  });
+
+  app.put("/api/admin/transcode", async (request) => {
+    requireAdmin(request);
+    const { enabled } = parse(transcodeBody, request.body);
+    await transcoder.setEnabled(enabled);
+    return { enabled };
+  });
+
   app.get("/api/admin/reports", async (request) => {
     requireAdmin(request);
     const rows = await ctx.db.rows<ReportRow>(

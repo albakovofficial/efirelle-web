@@ -63,6 +63,11 @@ EOF
   step "Настройки API записаны в $API_ENV"
 fi
 
+# --- ffmpeg: перекодирование в 720p/480p (включается в админке) -----------------
+if ! command -v ffmpeg >/dev/null; then
+  DEBIAN_FRONTEND=noninteractive apt-get install -yq ffmpeg >/dev/null && step "ffmpeg установлен" || step "ОШИБКА: ffmpeg не установился"
+fi
+
 # --- Картинки пользователей и записи эфиров -------------------------------------
 install -d -o "$APP_USER" -g "$APP_USER" -m 755 /var/lib/efirelle/uploads
 id -u mediamtx >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin mediamtx
@@ -115,6 +120,9 @@ authHTTPExclude:
   - action: metrics
   - action: pprof
 paths:
+  # Перекодированные качества: публикует наш ffmpeg, записывать не нужно.
+  "~^variants/":
+    record: no
   all_others:
     runOnReady: 'curl -fsS -X POST "http://127.0.0.1:4000/api/internal/media/ready?path=$MTX_PATH"'
     runOnNotReady: 'curl -fsS -X POST "http://127.0.0.1:4000/api/internal/media/not-ready?path=$MTX_PATH"'
