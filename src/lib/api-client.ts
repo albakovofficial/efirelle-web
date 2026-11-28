@@ -1,9 +1,14 @@
 "use client";
 
-import type { ChannelStatus, Prediction, PushStatus, ReportReason, Studio, Viewer } from "@/types";
+import type { ChannelAbout, ChannelLink, ChannelStatus, Emote, Prediction, PushStatus, ReportReason, ScheduledStream, Studio, Viewer } from "@/types";
 import { apiRequest } from "./api-request";
 
 export { ApiError } from "./api-request";
+
+/** Картинка уходит телом запроса как есть — формат сервер проверяет по содержимому. */
+function upload<T>(path: string, file: File, method = "PUT"): Promise<T> {
+  return apiRequest<T>(path, { method, credentials: "same-origin", body: file, headers: { "content-type": file.type || "application/octet-stream" } });
+}
 
 /** Запросы к API из браузера. Cookie сессии отправляется автоматически. */
 function call<T>(path: string, method = "GET", body?: unknown): Promise<T> {
@@ -46,6 +51,18 @@ export const api = {
   addMoment: (text: string) => call<{ moment: unknown }>("/api/studio/moments", "POST", { text }),
   ban: (username: string, minutes: number | null) => call<{ ok: true }>("/api/studio/bans", "POST", { username, minutes }),
   unban: (username: string) => call<{ ok: true }>(`/api/studio/bans/${username}`, "DELETE"),
+  uploadAvatar: (file: File) => upload<{ avatarUrl: string }>("/api/me/avatar", file),
+  removeAvatar: () => call<{ avatarUrl: null }>("/api/me/avatar", "DELETE"),
+  uploadBanner: (file: File) => upload<{ bannerUrl: string }>("/api/studio/banner", file),
+  removeBanner: () => call<{ bannerUrl: null }>("/api/studio/banner", "DELETE"),
+  updateAbout: (data: { description: string; links: ChannelLink[] }) => call<ChannelAbout>("/api/studio/profile", "PATCH", data),
+  addEmote: (code: string, file: File) => upload<{ emote: Emote }>(`/api/studio/emotes?code=${encodeURIComponent(code)}`, file, "POST"),
+  removeEmote: (code: string) => call<{ ok: true }>(`/api/studio/emotes/${code}`, "DELETE"),
+  schedule: (data: { title: string; categoryId: string; startsAt: string }) =>
+    call<{ scheduled: ScheduledStream }>("/api/studio/schedule", "POST", data),
+  unschedule: (id: string) => call<{ ok: true }>(`/api/studio/schedule/${id}`, "DELETE"),
+  remind: (id: string, on: boolean) =>
+    call<{ isReminded: boolean; reminders: number }>(`/api/schedule/${id}/remind`, on ? "PUT" : "DELETE"),
   raid: (target: string) => call<{ ok: true; viewers: number }>("/api/studio/raid", "POST", { target }),
 
   resolveReport: (id: string, action: "dismiss" | "delete_message" | "ban_user") =>

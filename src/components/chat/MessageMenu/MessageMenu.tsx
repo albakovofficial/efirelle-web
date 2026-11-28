@@ -23,12 +23,13 @@ interface MessageMenuProps {
   canDelete: boolean;
   onDeleted: () => void;
   onBlocked: () => void;
+  onReply: () => void;
 }
 
 type View = "actions" | "report" | "done";
 
-/** Действия с чужим сообщением: жалоба, скрыть автора, удалить, запрет писать. */
-export function MessageMenu({ message, isChannelOwner, canDelete, onDeleted, onBlocked }: MessageMenuProps) {
+/** Действия с чужим сообщением: ответить, жалоба, скрыть автора, удалить, запрет писать. */
+export function MessageMenu({ message, isChannelOwner, canDelete, onDeleted, onBlocked, onReply }: MessageMenuProps) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<View>("actions");
   const [status, setStatus] = useState<string | null>(null);
@@ -74,6 +75,17 @@ export function MessageMenu({ message, isChannelOwner, canDelete, onDeleted, onB
         <div className={styles.menu} role="menu">
           {view === "actions" && (
             <>
+              <button
+                type="button"
+                role="menuitem"
+                className={styles.item}
+                onClick={() => {
+                  setOpen(false);
+                  onReply();
+                }}
+              >
+                Ответить
+              </button>
               <button type="button" role="menuitem" className={styles.item} onClick={() => setView("report")}>
                 Пожаловаться
               </button>

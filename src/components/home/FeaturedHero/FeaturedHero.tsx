@@ -24,7 +24,7 @@ export function FeaturedHero({ main, others }: { main: Stream; others: Stream[] 
             <Icon name="play" size={28} />
           </span>
           <span className={styles.caption}>
-            <Avatar initials={channel.initials} tone={channel.tone} size="lg" />
+            <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} size="lg" />
             <span className={styles.captionText}>
               <span className={styles.title}>{main.title}</span>
               <span className={styles.meta}>{channel.name} · {main.category}</span>

@@ -13,9 +13,11 @@ interface AvatarProps {
   ring?: "live" | "active";
   /** Подпись для скринридера; без неё аватар декоративный. */
   label?: string;
+  /** Фото; без него — инициалы на цвете тона. */
+  imageUrl?: string | null;
 }
 
-export function Avatar({ initials, tone, size = "md", shape = "circle", live, ring, label }: AvatarProps) {
+export function Avatar({ initials, tone, size = "md", shape = "circle", live, ring, label, imageUrl }: AvatarProps) {
   const className = [styles.avatar, styles[size], styles[shape], ring && styles[`ring-${ring}`]]
     .filter(Boolean)
     .join(" ");
@@ -26,7 +28,7 @@ export function Avatar({ initials, tone, size = "md", shape = "circle", live, ri
       style={toneStyle(tone)}
       {...(label ? { role: "img", "aria-label": label } : { "aria-hidden": true })}
     >
-      {initials}
+      {imageUrl ? <img src={imageUrl} alt="" className={styles.image} /> : initials}
       {live && <span className={styles.liveDot} />}
     </span>
   );

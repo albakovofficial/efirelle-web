@@ -57,3 +57,22 @@
   color: inherit;
   text-decoration: underline;
 }
+
+/* Сообщение, где упомянули зрителя. */
+.mentioned {
+  margin: 0 -8px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: var(--color-accent-soft);
+}
+
+.reply {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

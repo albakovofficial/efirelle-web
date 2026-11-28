@@ -52,6 +52,7 @@ export function FollowingSidebar({ streams, defaultCollapsed = false, activeSlug
                 <Avatar
                   initials={channel.initials}
                   tone={channel.tone}
+                  imageUrl={channel.avatarUrl}
                   size={collapsed ? "lg" : "md"}
                   live
                   ring={collapsed && active ? "active" : undefined}

@@ -7,6 +7,7 @@ export interface Channel {
   name: string;
   initials: string;
   tone: Tone;
+  avatarUrl: string | null;
   followers: number;
   verified?: boolean;
 }
@@ -71,6 +72,8 @@ export interface ChatMessage {
   tone: Tone;
   badge?: ChatBadge;
   text: string;
+  /** Ответ на сообщение: кому и начало исходного текста. */
+  replyTo?: { id: string; author: string; text: string };
   createdAt: string;
 }
 
@@ -116,6 +119,7 @@ export interface Viewer {
   role: "user" | "admin";
   tone: Tone;
   sparks: number;
+  avatarUrl: string | null;
 }
 
 export interface SearchResults {
@@ -132,6 +136,39 @@ export interface ChannelWatch extends ChannelStatus {
   markers: Moment[];
   prediction: Prediction | null;
   chat: ChatMessage[];
+  about: ChannelAbout;
+  emotes: Emote[];
+  schedule: ScheduledStream[];
+}
+
+export interface ChannelLink {
+  title: string;
+  url: string;
+}
+
+/** Оформление канала. */
+export interface ChannelAbout {
+  description: string;
+  links: ChannelLink[];
+  bannerUrl: string | null;
+}
+
+/** Эмодзи канала: в чате пишется как :code:. */
+export interface Emote {
+  code: string;
+  url: string;
+}
+
+/** Анонс эфира. */
+export interface ScheduledStream {
+  id: string;
+  channel: Channel;
+  title: string;
+  category: string;
+  categoryId: string;
+  startsAt: string;
+  reminders: number;
+  isReminded: boolean;
 }
 
 export interface HomeFeed {
@@ -140,6 +177,7 @@ export interface HomeFeed {
   moments: Moment[];
   categories: Category[];
   forYou: Stream[];
+  upcoming: ScheduledStream[];
 }
 
 export interface Studio extends ChannelStatus {
@@ -147,6 +185,9 @@ export interface Studio extends ChannelStatus {
   ingest: { server: string; streamKey: string };
   prediction: Prediction | null;
   bans: { slug: string; name: string; until: string | null }[];
+  about: ChannelAbout;
+  emotes: Emote[];
+  schedule: ScheduledStream[];
 }
 
 export type ReportReason = "spam" | "harassment" | "hate" | "sexual" | "violence" | "other";

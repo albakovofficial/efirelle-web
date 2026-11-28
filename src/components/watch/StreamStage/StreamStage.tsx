@@ -1,15 +1,16 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { ChannelAbout } from "@/components/channel/ChannelAbout/ChannelAbout";
 import { Thumbnail } from "@/components/ui/Thumbnail/Thumbnail";
 import { Player } from "../Player/Player";
 import { StreamMoments } from "../StreamMoments/StreamMoments";
 import { useWatchRoom } from "../WatchRoom/WatchRoom";
 import styles from "./StreamStage.module.css";
 
-/** Сцена эфира: плеер (или заставка «не в сети»), блок канала, моменты. */
+/** Сцена канала: плеер (или заставка «не в сети»), блок канала, моменты, расписание и «О канале». */
 export function StreamStage({ children }: { children?: ReactNode }) {
-  const { watch, viewers, markers } = useWatchRoom();
+  const { watch, viewer, viewers, markers } = useWatchRoom();
   const { stream, channel } = watch;
 
   return (
@@ -28,6 +29,7 @@ export function StreamStage({ children }: { children?: ReactNode }) {
       )}
       {children}
       {stream && <StreamMoments markers={markers} />}
+      <ChannelAbout name={channel.name} about={watch.about} schedule={watch.schedule} signedIn={viewer !== null} />
     </>
   );
 }

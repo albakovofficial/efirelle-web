@@ -5,14 +5,15 @@ import { StreamsForYou } from "@/components/home/StreamsForYou/StreamsForYou";
 import { FollowingSidebar } from "@/components/layout/FollowingSidebar/FollowingSidebar";
 import { PageShell } from "@/components/layout/PageShell/PageShell";
 import { MomentCard } from "@/components/moments/MomentCard/MomentCard";
+import { ScheduleCard } from "@/components/schedule/ScheduleCard";
 import { AutoGrid } from "@/components/ui/AutoGrid/AutoGrid";
 import { Button } from "@/components/ui/Button/Button";
 import { Section, SectionEmpty } from "@/components/ui/Section/Section";
-import { getHomeFeed } from "@/data/api";
+import { getCurrentViewer, getHomeFeed } from "@/data/api";
 
-/** Главная: витрина, живые моменты, категории, персональная лента. */
+/** Главная: витрина, ближайшие анонсы, живые моменты, категории, персональная лента. */
 export default async function HomePage() {
-  const feed = await getHomeFeed();
+  const [feed, viewer] = await Promise.all([getHomeFeed(), getCurrentViewer()]);
   const following = feed.following.flatMap((status) => (status.stream ? [status.stream] : []));
   const [mainStream, ...otherFeatured] = feed.featured;
 
@@ -28,6 +29,16 @@ export default async function HomePage() {
           <Button href="/studio" variant="dark">
             Открыть студию
           </Button>
+        </Section>
+      )}
+
+      {feed.upcoming.length > 0 && (
+        <Section id="upcoming" title="Скоро в эфире" subtitle="Анонсы авторов — нажмите «Напомнить», и мы пришлём уведомление">
+          <AutoGrid min={240}>
+            {feed.upcoming.map((item) => (
+              <ScheduleCard key={item.id} item={item} signedIn={viewer !== null} />
+            ))}
+          </AutoGrid>
         </Section>
       )}
 

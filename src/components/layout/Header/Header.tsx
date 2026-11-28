@@ -28,7 +28,7 @@ export function Header({ viewer }: { viewer: Viewer | null }) {
                 В эфир
               </Button>
               <Link href="/settings" aria-label={`Профиль: ${viewer.displayName}`}>
-                <Avatar initials={viewer.initials} tone={viewer.tone} size="lg" shape="rounded" />
+                <Avatar initials={viewer.initials} tone={viewer.tone} imageUrl={viewer.avatarUrl} size="lg" shape="rounded" />
               </Link>
             </>
           ) : (

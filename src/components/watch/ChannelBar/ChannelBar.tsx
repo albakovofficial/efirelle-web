@@ -21,7 +21,7 @@ export function ChannelBar() {
 
   return (
     <div className={styles.bar}>
-      <Avatar initials={channel.initials} tone={channel.tone} size="xl" ring={stream ? "live" : undefined} />
+      <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} size="xl" ring={stream ? "live" : undefined} />
       <div className={styles.info}>
         <p className={styles.channel}>
           {channel.name}

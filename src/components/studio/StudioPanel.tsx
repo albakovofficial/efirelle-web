@@ -11,6 +11,7 @@ import { formatCount, formatDuration, VIEWER_FORMS } from "@/lib/format";
 import { channelHref } from "@/lib/routes";
 import { useSubmit } from "@/lib/useSubmit";
 import type { Category, Studio } from "@/types";
+import { AppearanceCard, EmotesCard, ScheduleStudioCard } from "./StudioChannelCards";
 import styles from "./StudioPanel.module.css";
 
 const PREDICTION_DURATIONS = [
@@ -20,7 +21,7 @@ const PREDICTION_DURATIONS = [
   { seconds: 600, label: "10 минут" },
 ];
 
-/** Студия автора: подключение OBS, настройки эфира, прогнозы, моменты, рейд, баны. */
+/** Студия автора: подключение OBS, настройки и оформление, расписание, прогнозы, моменты, рейд, эмодзи, баны. */
 export function StudioPanel({ studio, categories }: { studio: Studio; categories: Category[] }) {
   const router = useRouter();
   const refresh = () => router.refresh();
@@ -46,8 +47,11 @@ export function StudioPanel({ studio, categories }: { studio: Studio; categories
 
       <IngestCard ingest={studio.ingest} />
       <SettingsCard settings={studio.settings} categories={categories} onSaved={refresh} />
+      <AppearanceCard studio={studio} onChange={refresh} />
+      <ScheduleStudioCard studio={studio} categories={categories} onChange={refresh} />
       <PredictionCardStudio studio={studio} onChange={refresh} />
       {stream && <LiveToolsCard />}
+      <EmotesCard studio={studio} onChange={refresh} />
       <BansCard bans={studio.bans} onChange={refresh} />
     </div>
   );

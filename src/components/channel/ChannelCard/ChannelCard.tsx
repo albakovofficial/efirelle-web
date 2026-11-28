@@ -12,7 +12,7 @@ export function ChannelCard({ channel, stream }: ChannelStatus) {
   const live = stream !== null;
   return (
     <Link href={channelHref(channel.slug)} className={`${styles.card} ${styles.link} ${live ? "" : styles.idle}`}>
-      <Avatar initials={channel.initials} tone={channel.tone} size="xl" ring={live ? "live" : undefined} />
+      <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} size="xl" ring={live ? "live" : undefined} />
       <span className={styles.text}>
         <span className={styles.name}>
           {channel.name}

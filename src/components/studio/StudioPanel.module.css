@@ -90,3 +90,96 @@
 .ban > :nth-child(2) {
   flex: 1;
 }
+
+.media {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.filePicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filePicker:focus-within {
+  outline: 2px solid var(--color-accent);
+}
+
+.filePickerDisabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.bannerPreview {
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.error {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a1222b;
+}
+
+.textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.input {
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 15px;
+}
+
+.linkRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.emoteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.emoteItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 8px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.emoteItem img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}

@@ -23,7 +23,7 @@ export function StreamCard({ stream }: { stream: Stream }) {
         </span>
       </Thumbnail>
       <span className={styles.body}>
-        <Avatar initials={channel.initials} tone={channel.tone} />
+        <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} />
         <span className={styles.text}>
           <span className={styles.title}>{stream.title}</span>
           <span className={styles.meta}>{channel.name} · {stream.category}</span>

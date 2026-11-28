@@ -40,7 +40,7 @@ export function SettingsPanel({ viewer, blocked: initialBlocked }: { viewer: Vie
     <div className={styles.grid}>
       <FormCard as="div" title="Аккаунт">
         <div className={styles.profile}>
-          <Avatar initials={viewer.initials} tone={viewer.tone} size="xl" />
+          <Avatar initials={viewer.initials} tone={viewer.tone} imageUrl={viewer.avatarUrl} size="xl" />
           <div className={styles.who}>
             <strong>{viewer.displayName}</strong>
             <span>@{viewer.username} · {viewer.email}</span>

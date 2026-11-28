@@ -55,3 +55,17 @@ export function formatDuration(totalSeconds: number): string {
   const ss = String(seconds).padStart(2, "0");
   return hours > 0 ? `${hours}:${mm}:${ss}` : `${mm}:${ss}`;
 }
+
+const scheduleFormat = new Intl.DateTimeFormat("ru-RU", {
+  weekday: "short",
+  day: "numeric",
+  month: "long",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Moscow",
+});
+
+/** Время анонса: «сб, 29 ноября, 20:00» по Москве — одинаково на сервере и в браузере. */
+export function formatScheduleDate(iso: string): string {
+  return scheduleFormat.format(new Date(iso));
+}

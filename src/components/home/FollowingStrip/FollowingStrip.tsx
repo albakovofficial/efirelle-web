@@ -13,7 +13,7 @@ export function FollowingStrip({ streams }: { streams: Stream[] }) {
         {streams.map(({ id, channel }) => (
           <li key={id}>
             <Link href={channelHref(channel.slug)} className={styles.item}>
-              <Avatar initials={channel.initials} tone={channel.tone} size="xl" ring="live" />
+              <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} size="xl" ring="live" />
               <span className={styles.name}>{channel.name.split(" ")[0]}</span>
             </Link>
           </li>

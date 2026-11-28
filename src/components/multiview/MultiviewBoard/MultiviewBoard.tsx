@@ -88,7 +88,7 @@ export function MultiviewBoard({ streams, initialSlugs }: MultiviewBoardProps) {
                     />
                   </span>
                   <Link href={channelHref(channel.slug)} className={styles.caption}>
-                    <Avatar initials={channel.initials} tone={channel.tone} size="sm" />
+                    <Avatar initials={channel.initials} tone={channel.tone} imageUrl={channel.avatarUrl} size="sm" />
                     <span className={styles.captionText}>
                       <span className={styles.captionName}>{channel.name}</span>
                       <span className={styles.captionTitle}>{stream.title}</span>
@@ -120,7 +120,7 @@ export function MultiviewBoard({ streams, initialSlugs }: MultiviewBoardProps) {
                   aria-label={`Добавить на экран: ${stream.channel.name}`}
                   onClick={() => add(stream.channel.slug)}
                 >
-                  <Avatar initials={stream.channel.initials} tone={stream.channel.tone} live />
+                  <Avatar initials={stream.channel.initials} tone={stream.channel.tone} imageUrl={stream.channel.avatarUrl} live />
                   <span className={styles.optionText}>
                     <span className={styles.optionName}>{stream.channel.name}</span>
                     <span className={styles.optionMeta}>

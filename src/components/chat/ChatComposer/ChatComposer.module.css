@@ -40,4 +40,57 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+}
+
+.reply {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 13px;
+}
+
+.replyText {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-muted);
+}
+
+.replyText strong {
+  color: var(--color-ink);
+}
+
+.emotes {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.emote {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+
+.emote:hover,
+.emote:focus-visible {
+  background: var(--color-bg);
+}
+
+.emote img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

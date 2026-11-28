@@ -30,7 +30,7 @@ interface WatchRoomState {
   connected: boolean;
   /** Последняя ошибка чата («слишком часто», «сообщение не прошло фильтр»). */
   notice: string | null;
-  send: (text: string) => boolean;
+  send: (text: string, replyTo?: string) => boolean;
   setPrediction: (prediction: Prediction) => void;
   removeMessage: (id: string) => void;
   hideAuthor: (authorId: string) => void;
@@ -152,13 +152,13 @@ export function WatchRoomProvider({ watch, viewer, children }: { watch: ChannelW
     };
   }, [slug, handleEvent]);
 
-  const send = useCallback((text: string) => {
+  const send = useCallback((text: string, replyTo?: string) => {
     const socket = socketRef.current;
     if (!socket || socket.readyState !== WebSocket.OPEN) {
       setNotice("Нет связи с чатом. Переподключаемся…");
       return false;
     }
-    socket.send(JSON.stringify({ type: "send", text }));
+    socket.send(JSON.stringify({ type: "send", text, ...(replyTo ? { replyTo } : {}) }));
     return true;
   }, []);
 

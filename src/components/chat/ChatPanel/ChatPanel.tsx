@@ -5,6 +5,7 @@ import { useWatchRoom } from "@/components/watch/WatchRoom/WatchRoom";
 import { Button } from "@/components/ui/Button/Button";
 import { SegmentedControl, type SegmentOption } from "@/components/ui/SegmentedControl/SegmentedControl";
 import { channelHref, loginHref } from "@/lib/routes";
+import type { ChatMessage } from "@/types";
 import { isImportant } from "../chatBadge";
 import { ChatComposer } from "../ChatComposer/ChatComposer";
 import { ChatLine } from "../ChatLine/ChatLine";
@@ -26,6 +27,7 @@ export function ChatPanel() {
   const room = useWatchRoom();
   const { watch, viewer, entries, prediction, notice, dismissNotice } = room;
   const [view, setView] = useState<ChatView>("all");
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const canDelete = watch.isOwner || viewer?.role === "admin";
 
@@ -65,6 +67,8 @@ export function ChatPanel() {
           <ChatLine
             key={entry.id}
             entry={entry}
+            emotes={watch.emotes}
+            username={viewer?.username}
             menu={
               viewer && entry.kind === "message" && entry.authorId !== viewer.id ? (
                 <MessageMenu
@@ -73,6 +77,7 @@ export function ChatPanel() {
                   canDelete={canDelete}
                   onDeleted={() => room.removeMessage(entry.id)}
                   onBlocked={() => room.hideAuthor(entry.authorId)}
+                  onReply={() => setReplyTo(entry)}
                 />
               ) : undefined
             }
@@ -87,7 +92,17 @@ export function ChatPanel() {
       )}
 
       {viewer ? (
-        <ChatComposer sparks={viewer.sparks} onSend={room.send} />
+        <ChatComposer
+          sparks={viewer.sparks}
+          emotes={watch.emotes}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onSend={(text) => {
+            const sent = room.send(text, replyTo?.id);
+            if (sent) setReplyTo(null);
+            return sent;
+          }}
+        />
       ) : (
         <div className={styles.guest}>
           <p>Войдите, чтобы писать в чат и участвовать в прогнозах</p>
