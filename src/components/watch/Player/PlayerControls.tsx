@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button/Button";
 import { formatDuration } from "@/lib/format";
+import { ClipButton } from "../ClipButton/ClipButton";
 import styles from "./Player.module.css";
 
 interface PlayerControlsProps {
@@ -15,9 +16,11 @@ interface PlayerControlsProps {
   onToggleMute: () => void;
   onJumpToLive: () => void;
   onToggleFullscreen: () => void;
+  /** Канал — для кнопки «Клип»; без входа кнопки нет. */
+  clipChannel: string | null;
 }
 
-/** Панель управления под видео: пауза, звук, возврат к прямому эфиру, полный экран. */
+/** Панель управления под видео: пауза, звук, возврат к прямому эфиру, клип, полный экран. */
 export function PlayerControls({
   paused,
   muted,
@@ -27,6 +30,7 @@ export function PlayerControls({
   onToggleMute,
   onJumpToLive,
   onToggleFullscreen,
+  clipChannel,
 }: PlayerControlsProps) {
   return (
     <div className={styles.controls}>
@@ -55,6 +59,7 @@ export function PlayerControls({
 
       <span className={styles.spacer} />
 
+      {clipChannel && <ClipButton channelSlug={clipChannel} />}
       <Button variant="soft" icon="multiview" href="/multiview" className={styles.wideOnly}>Мультиэфир</Button>
       <Button variant="soft" icon="fullscreen" aria-label="Во весь экран" onClick={onToggleFullscreen} />
     </div>

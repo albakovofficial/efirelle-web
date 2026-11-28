@@ -1,0 +1,28 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xl);
+  background: #0d1220;
+}
+
+.pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

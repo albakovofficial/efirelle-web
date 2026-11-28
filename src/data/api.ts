@@ -13,6 +13,7 @@ import type {
   Category,
   ChannelStatus,
   ChannelWatch,
+  Clip,
   HomeFeed,
   PushStatus,
   SearchResults,
@@ -94,3 +95,7 @@ export async function getAdminReports(): Promise<AdminReport[] | null> {
 export async function getPushStatus(): Promise<PushStatus | null> {
   return getOrNull<PushStatus>("/api/admin/push");
 }
+
+export const getClip = cache(async (id: string): Promise<Clip | null> => {
+  return (await getOrNull<{ clip: Clip }>(`/api/clips/${encodeURIComponent(id)}`))?.clip ?? null;
+});

@@ -22,3 +22,7 @@ export function multiviewHref(slugs: readonly string[]): string {
 export function loginHref(next?: string): string {
   return next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 }
+
+export function clipHref(id: string): string {
+  return `/clip/${id}`;
+}

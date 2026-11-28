@@ -14,10 +14,12 @@ interface PlayerProps {
   stream: Stream;
   /** Зрители из чата в реальном времени; до первого события — из ответа сервера. */
   viewers: number;
+  /** Вошёл ли зритель: только тогда можно сделать клип. */
+  canClip: boolean;
 }
 
 /** Плеер прямого эфира: видео, бейджи поверх, управление снизу. */
-export function Player({ stream, viewers }: PlayerProps) {
+export function Player({ stream, viewers, canClip }: PlayerProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HlsVideoHandle>(null);
   const [paused, setPaused] = useState(false);
@@ -82,6 +84,7 @@ export function Player({ stream, viewers }: PlayerProps) {
           onToggleMute={() => setMuted((value) => !value)}
           onJumpToLive={jumpToLive}
           onToggleFullscreen={toggleFullscreen}
+          clipChannel={canClip ? stream.channel.slug : null}
         />
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { CategoryCard } from "@/components/category/CategoryCard/CategoryCard";
+import { ClipCard } from "@/components/clips/ClipCard/ClipCard";
 import { FeaturedHero } from "@/components/home/FeaturedHero/FeaturedHero";
 import { FollowingStrip } from "@/components/home/FollowingStrip/FollowingStrip";
 import { StreamsForYou } from "@/components/home/StreamsForYou/StreamsForYou";
@@ -11,7 +12,7 @@ import { Button } from "@/components/ui/Button/Button";
 import { Section, SectionEmpty } from "@/components/ui/Section/Section";
 import { getCurrentViewer, getHomeFeed } from "@/data/api";
 
-/** Главная: витрина, ближайшие анонсы, живые моменты, категории, персональная лента. */
+/** Главная: витрина, анонсы, живые моменты, клипы, категории, персональная лента. */
 export default async function HomePage() {
   const [feed, viewer] = await Promise.all([getHomeFeed(), getCurrentViewer()]);
   const following = feed.following.flatMap((status) => (status.stream ? [status.stream] : []));
@@ -51,6 +52,16 @@ export default async function HomePage() {
           <AutoGrid min={230}>
             {feed.moments.map((moment) => (
               <MomentCard key={moment.id} moment={moment} />
+            ))}
+          </AutoGrid>
+        </Section>
+      )}
+
+      {feed.clips.length > 0 && (
+        <Section id="clips" title="Популярные клипы" subtitle="Лучшие моменты недели — сохранили зрители">
+          <AutoGrid min={220}>
+            {feed.clips.map((clip) => (
+              <ClipCard key={clip.id} clip={clip} />
             ))}
           </AutoGrid>
         </Section>

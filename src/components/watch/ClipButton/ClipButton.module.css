@@ -1,0 +1,47 @@
+.root {
+  position: relative;
+}
+
+.popover {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: 280px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-float);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.link {
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+.input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.error {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a1222b;
+}

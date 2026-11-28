@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChannelAbout, ChannelLink, ChannelStatus, Emote, Prediction, PushStatus, ReportReason, ScheduledStream, Studio, Viewer } from "@/types";
+import type { ChannelAbout, ChannelLink, ChannelStatus, Clip, Emote, Prediction, PushStatus, ReportReason, ScheduledStream, Studio, Viewer } from "@/types";
 import { apiRequest } from "./api-request";
 
 export { ApiError } from "./api-request";
@@ -63,6 +63,10 @@ export const api = {
   unschedule: (id: string) => call<{ ok: true }>(`/api/studio/schedule/${id}`, "DELETE"),
   remind: (id: string, on: boolean) =>
     call<{ isReminded: boolean; reminders: number }>(`/api/schedule/${id}/remind`, on ? "PUT" : "DELETE"),
+  createClip: (slug: string, title: string) => call<{ clip: Clip }>(`/api/channels/${slug}/clips`, "POST", { title }),
+  clip: (id: string) => call<{ clip: Clip }>(`/api/clips/${id}`),
+  viewClip: (id: string) => call<{ ok: true }>(`/api/clips/${id}/view`, "POST", {}),
+  deleteClip: (id: string) => call<{ ok: true }>(`/api/clips/${id}`, "DELETE"),
   raid: (target: string) => call<{ ok: true; viewers: number }>("/api/studio/raid", "POST", { target }),
 
   resolveReport: (id: string, action: "dismiss" | "delete_message" | "ban_user") =>

@@ -139,6 +139,32 @@ export interface ChannelWatch extends ChannelStatus {
   about: ChannelAbout;
   emotes: Emote[];
   schedule: ScheduledStream[];
+  recordings: Recording[];
+  clips: Clip[];
+}
+
+/** Запись завершённого эфира (хранится 3 дня). */
+export interface Recording {
+  id: string;
+  title: string;
+  category: string;
+  startedAt: string;
+  durationSeconds: number;
+  peakViewers: number;
+  url: string;
+}
+
+/** Клип — 30 секунд эфира отдельным файлом. */
+export interface Clip {
+  id: string;
+  title: string;
+  channel: Channel;
+  author: string | null;
+  status: "processing" | "ready" | "failed";
+  url: string | null;
+  durationSeconds: number;
+  views: number;
+  createdAt: string;
 }
 
 export interface ChannelLink {
@@ -178,6 +204,7 @@ export interface HomeFeed {
   categories: Category[];
   forYou: Stream[];
   upcoming: ScheduledStream[];
+  clips: Clip[];
 }
 
 export interface Studio extends ChannelStatus {
