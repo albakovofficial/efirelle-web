@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { AppContext, Viewer } from "../../context.js";
 import { randomToken, sha256 } from "../../lib/crypto.js";
-import { unauthorized } from "../../lib/http.js";
+import { forbidden, unauthorized } from "../../lib/http.js";
 
 export const SESSION_COOKIE = "efirelle_session";
 const SESSION_DAYS = 90;
@@ -81,4 +81,11 @@ export async function endSession(ctx: AppContext, request: FastifyRequest, reply
 export function requireViewer(request: FastifyRequest): Viewer {
   if (!request.viewer) throw unauthorized();
   return request.viewer;
+}
+
+/** Только для администраторов платформы (модерация, настройки сервиса). */
+export function requireAdmin(request: FastifyRequest): Viewer {
+  const viewer = requireViewer(request);
+  if (viewer.role !== "admin") throw forbidden();
+  return viewer;
 }

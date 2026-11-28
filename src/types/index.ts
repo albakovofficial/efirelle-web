@@ -167,3 +167,11 @@ export interface BlockedUser {
   slug: string;
   name: string;
 }
+
+/** Ключ APNs для уведомлений на iPhone. Сам ключ сервер не отдаёт. */
+export interface PushStatus {
+  configured: boolean;
+  keyId: string | null;
+  teamId: string | null;
+  updatedAt: string | null;
+}

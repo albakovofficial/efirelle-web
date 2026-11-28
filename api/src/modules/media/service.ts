@@ -1,4 +1,5 @@
 import type { AppContext } from "../../context.js";
+import type { PushService } from "../push/service.js";
 
 /** Эфиры приходят в медиасервер по адресу live/<имя канала>. */
 const PATH_PATTERN = /^live\/([a-z0-9_]{3,24})$/;
@@ -9,7 +10,10 @@ export function usernameFromPath(path: string): string | null {
 
 /** Состояние эфиров: начало, окончание и сверка с медиасервером. */
 export class LiveService {
-  constructor(private readonly ctx: AppContext) {}
+  constructor(
+    private readonly ctx: AppContext,
+    private readonly push: PushService,
+  ) {}
 
   /** Проверка ключа при подключении OBS. */
   async canPublish(username: string, key: string): Promise<boolean> {
@@ -38,7 +42,10 @@ export class LiveService {
       await client.query("UPDATE channels SET live_since = now(), current_session_id = $1 WHERE user_id = $2", [session!.id, channel.user_id]);
       return channel.user_id;
     });
-    if (channelId) this.ctx.hub.broadcast(channelId, { type: "live", live: true });
+    if (!channelId) return;
+    this.ctx.hub.broadcast(channelId, { type: "live", live: true });
+    // Уведомления не задерживают ответ медиасерверу: ошибка APNs эфир не ломает.
+    this.push.notifyLive(channelId).catch(() => undefined);
   }
 
   async stop(username: string): Promise<void> {

@@ -50,7 +50,7 @@ export function SettingsPanel({ viewer, blocked: initialBlocked }: { viewer: Vie
         <div className={styles.actions}>
           <Button href={channelHref(viewer.username)}>Мой канал</Button>
           <Button href="/studio">Студия</Button>
-          {viewer.role === "admin" && <Button href="/admin">Жалобы</Button>}
+          {viewer.role === "admin" && <Button href="/admin">Администрирование</Button>}
           <Button variant="ghost" onClick={logout}>
             Выйти
           </Button>

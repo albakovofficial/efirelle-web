@@ -7,12 +7,17 @@ import { migrate } from "../src/db/migrate.js";
 import type { Mail, Mailer } from "../src/lib/mailer.js";
 import { ChatHub } from "../src/realtime/hub.js";
 import type { LiveService } from "../src/modules/media/service.js";
+import type { PushDevice, PushMessage, PushResult, PushSender } from "../src/modules/push/apns.js";
 
 export interface TestApp {
   app: FastifyInstance;
   ctx: AppContext;
   live: LiveService;
   mails: Mail[];
+  /** Уведомления, «отправленные» в APNs. */
+  pushes: { device: PushDevice; message: PushMessage }[];
+  /** Что ответит APNs на токен (по умолчанию — доставлено). */
+  pushResults: Map<string, PushResult>;
   close(): Promise<void>;
 }
 
@@ -43,7 +48,16 @@ export async function createTestApp(): Promise<TestApp> {
     smtp: null,
     isProduction: false,
   };
-  const ctx: AppContext = { config, db, hub: new ChatHub(), mailer };
+  const pushes: TestApp["pushes"] = [];
+  const pushResults = new Map<string, PushResult>();
+  const pushTransport: PushSender = {
+    async send(device, message) {
+      pushes.push({ device, message });
+      return pushResults.get(device.token) ?? "sent";
+    },
+    close() {},
+  };
+  const ctx: AppContext = { config, db, hub: new ChatHub(), mailer, pushTransport };
   const { app, services } = await buildApp(ctx);
   await app.ready();
   return {
@@ -51,6 +65,8 @@ export async function createTestApp(): Promise<TestApp> {
     ctx,
     live: services.live,
     mails,
+    pushes,
+    pushResults,
     async close() {
       await app.close();
       await db.close();

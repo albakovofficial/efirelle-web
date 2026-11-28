@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChannelStatus, Prediction, ReportReason, Studio, Viewer } from "@/types";
+import type { ChannelStatus, Prediction, PushStatus, ReportReason, Studio, Viewer } from "@/types";
 import { apiRequest } from "./api-request";
 
 export { ApiError } from "./api-request";
@@ -50,6 +50,8 @@ export const api = {
 
   resolveReport: (id: string, action: "dismiss" | "delete_message" | "ban_user") =>
     call<{ ok: true }>(`/api/admin/reports/${id}/resolve`, "POST", { action }),
+  savePushKey: (data: { keyId: string; teamId: string; privateKey: string }) => call<PushStatus>("/api/admin/push", "PUT", data),
+  testPush: () => call<{ devices: number; sent: number }>("/api/admin/push/test", "POST", {}),
 };
 
 /** Адрес WebSocket чата канала на том же домене. */

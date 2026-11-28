@@ -1,6 +1,7 @@
 import type { Config } from "./config.js";
 import type { Database } from "./db/database.js";
 import type { Mailer } from "./lib/mailer.js";
+import type { PushSender } from "./modules/push/apns.js";
 import type { ChatHub } from "./realtime/hub.js";
 
 /** Общие зависимости, которые получают все модули API. */
@@ -9,6 +10,8 @@ export interface AppContext {
   db: Database;
   hub: ChatHub;
   mailer: Mailer;
+  /** Подмена отправки уведомлений в тестах; в работе — `undefined`, используется APNs. */
+  pushTransport?: PushSender;
 }
 
 /** Текущий пользователь запроса. */

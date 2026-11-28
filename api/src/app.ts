@@ -16,6 +16,8 @@ import { registerMediaRoutes } from "./modules/media/routes.js";
 import { LiveService } from "./modules/media/service.js";
 import { MomentService } from "./modules/moments/service.js";
 import { registerPredictionRoutes } from "./modules/predictions/routes.js";
+import { registerPushRoutes } from "./modules/push/routes.js";
+import { PushService } from "./modules/push/service.js";
 import { PredictionService } from "./modules/predictions/service.js";
 import { registerStudioRoutes } from "./modules/studio/routes.js";
 
@@ -23,6 +25,7 @@ const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
 export interface Services {
   live: LiveService;
+  push: PushService;
 }
 
 /** Собирает приложение: плагины, определение пользователя, все модули. Используется сервером и тестами. */
@@ -70,7 +73,8 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   const moments = new MomentService(ctx, channels);
   const predictions = new PredictionService(ctx, moments);
   const chat = new ChatService(ctx, moments);
-  const live = new LiveService(ctx);
+  const push = new PushService(ctx);
+  const live = new LiveService(ctx, push);
 
   app.get("/api/health", async () => ({ ok: true }));
   registerAuthRoutes(app, ctx);
@@ -81,6 +85,8 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   registerStudioRoutes(app, ctx, channels, predictions, moments, chat);
   registerAdminRoutes(app, ctx);
   registerMediaRoutes(app, live);
+  registerPushRoutes(app, ctx, push);
+  app.addHook("onClose", async () => push.close());
 
-  return { app, services: { live } };
+  return { app, services: { live, push } };
 }

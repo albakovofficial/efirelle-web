@@ -14,6 +14,7 @@ import type {
   ChannelStatus,
   ChannelWatch,
   HomeFeed,
+  PushStatus,
   SearchResults,
   Stream,
   Studio,
@@ -88,4 +89,8 @@ export async function getBlockedUsers(): Promise<BlockedUser[]> {
 
 export async function getAdminReports(): Promise<AdminReport[] | null> {
   return (await getOrNull<{ reports: AdminReport[] }>("/api/admin/reports"))?.reports ?? null;
+}
+
+export async function getPushStatus(): Promise<PushStatus | null> {
+  return getOrNull<PushStatus>("/api/admin/push");
 }

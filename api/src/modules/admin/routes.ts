@@ -1,8 +1,8 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import type { AppContext, Viewer } from "../../context.js";
-import { forbidden, notFound, parse } from "../../lib/http.js";
-import { requireViewer } from "../auth/sessions.js";
+import type { AppContext } from "../../context.js";
+import { notFound, parse } from "../../lib/http.js";
+import { requireAdmin } from "../auth/sessions.js";
 
 const resolveBody = z.object({
   action: z.enum(["dismiss", "delete_message", "ban_user"], { message: "Выберите действие" }),
@@ -19,12 +19,6 @@ interface ReportRow {
   target_name: string;
   reporter_username: string | null;
   channel_username: string | null;
-}
-
-function requireAdmin(request: FastifyRequest): Viewer {
-  const viewer = requireViewer(request);
-  if (viewer.role !== "admin") throw forbidden();
-  return viewer;
 }
 
 /** Модерация платформы: жалобы рассматриваются администратором (по правилам — в течение 24 часов). */
