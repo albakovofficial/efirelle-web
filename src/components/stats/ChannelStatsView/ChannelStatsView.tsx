@@ -89,15 +89,17 @@ function Metric({ title, value, note }: { title: string; value: string; note: st
 }
 
 /** Линия зрителей по ходу эфира; в полном размере — с мягкой заливкой. */
-function ViewersChart({ points, className, compact = false }: { points: number[]; className: string; compact?: boolean }) {
+function ViewersChart({ points, className, compact = false }: { points: number[]; className?: string; compact?: boolean }) {
   const width = 300;
   const height = compact ? 40 : 120;
   const max = Math.max(1, ...points);
-  const coords = points.map((value, index) => [
-    (index / (points.length - 1)) * width,
-    height - 4 - (value / max) * (height - 8),
-  ]);
-  const line = coords.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const line = points
+    .map((value, index) => {
+      const x = (index / (points.length - 1)) * width;
+      const y = height - 4 - (value / max) * (height - 8);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
   return (
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className={className} role="img" aria-label={`Зрители: от ${Math.min(...points)} до ${max}`}>
       {!compact && <polygon points={`0,${height} ${line} ${width},${height}`} className={styles.area} />}
