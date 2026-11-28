@@ -141,7 +141,6 @@ function PredictionCardStudio({ studio, onChange }: { studio: Studio; onChange: 
   const prediction = studio.prediction;
   const [outcomeCount, setOutcomeCount] = useState(2);
   const [busy, setBusy] = useState(false);
-  const active = prediction && (prediction.status === "open" || prediction.status === "locked");
 
   const create = useSubmit(async (fields) => {
     const outcomes = Array.from({ length: outcomeCount }, (_, i) => (fields[`outcome${i}`] ?? "").trim());
@@ -163,7 +162,7 @@ function PredictionCardStudio({ studio, onChange }: { studio: Studio; onChange: 
     }
   }
 
-  if (active) {
+  if (prediction && (prediction.status === "open" || prediction.status === "locked")) {
     return (
       <FormCard
         as="div"

@@ -7,7 +7,7 @@ interface FormCardProps {
   /** Ошибка или итог отправки — показывается над кнопкой. */
   message?: { tone: "error" | "success"; text: string } | null;
   onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
-  children: ReactNode;
+  children?: ReactNode;
   /** Ссылки под формой («Нет аккаунта? Зарегистрироваться»). */
   footer?: ReactNode;
   as?: "form" | "div";
