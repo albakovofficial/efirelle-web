@@ -84,7 +84,7 @@ jobs:
     needs: [web, api]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
 
@@ -94,3 +94,19 @@ jobs:
       # Сервер сразу забирает новую версию. Если сигнал не дошёл — подхватит по таймеру за 15 секунд.
       - name: Сигнал серверу
         run: curl -fsS -m 15 -X POST https://efirelle.ru/_deploy-hook || echo "::warning::Сервер не ответил на сигнал — выкладка пройдёт по таймеру"
+
+      # Ждём, пока сервер соберёт этот коммит, и проверяем, что все службы работают.
+      - name: Проверка выкладки
+        run: |
+          report=""
+          for _ in $(seq 60); do
+            report=$(curl -fsS -m 10 http://87.228.24.55/efirelle-provision.txt 2>/dev/null || true)
+            grep -q "Коммит: $GITHUB_SHA" <<<"$report" && break
+            sleep 10
+          done
+          echo "$report"
+          grep -q "Коммит: $GITHUB_SHA" <<<"$report" || { echo "::error::Сервер не выложил $GITHUB_SHA за 10 минут"; exit 1; }
+          if grep -E "ОШИБКА|: (failed|inactive)$" <<<"$report"; then
+            echo "::error::После выкладки есть ошибки — см. отчёт выше"
+            exit 1
+          fi

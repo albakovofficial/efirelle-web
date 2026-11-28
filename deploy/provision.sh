@@ -230,6 +230,8 @@ else
 fi
 
 # --- Итог ----------------------------------------------------------------------
+# CI сверяет эту строку с выложенным коммитом (шаг «Проверка выкладки»).
+step "Коммит: $(sudo -u "$APP_USER" git -C "$APP_DIR" rev-parse HEAD 2>/dev/null || echo нет)"
 for unit in postgresql efirelle-api mediamtx efirelle-web nginx; do
   step "$unit: $(systemctl is-active "$unit")"
 done
