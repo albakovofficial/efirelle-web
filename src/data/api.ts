@@ -99,3 +99,7 @@ export async function getPushStatus(): Promise<PushStatus | null> {
 export const getClip = cache(async (id: string): Promise<Clip | null> => {
   return (await getOrNull<{ clip: Clip }>(`/api/clips/${encodeURIComponent(id)}`))?.clip ?? null;
 });
+
+export async function getTranscode(): Promise<boolean | null> {
+  return (await getOrNull<{ enabled: boolean }>("/api/admin/transcode"))?.enabled ?? null;
+}

@@ -30,6 +30,8 @@ export interface Stream {
   tone: Tone;
   /** Адрес HLS-потока. */
   playbackUrl: string;
+  /** Доступные качества; первое — исходное. */
+  qualities: { label: string; url: string }[];
 }
 
 export type MomentKind = "raid" | "prediction" | "chatPeak" | "giveaway" | "highlight";

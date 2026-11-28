@@ -26,6 +26,9 @@ export function Player({ stream, viewers, canClip }: PlayerProps) {
   const [muted, setMuted] = useState(true);
   const [behindLive, setBehindLive] = useState(false);
   const [status, setStatus] = useState<"loading" | "playing" | "error">("loading");
+  const [quality, setQuality] = useState(stream.playbackUrl);
+  // Пропало выбранное качество (перекодирование выключили) — возвращаемся к исходному.
+  const source = stream.qualities.some((q) => q.url === quality) ? quality : stream.playbackUrl;
   const duration = stream.durationSeconds + useElapsedSeconds(stream.id);
 
   function togglePlay() {
@@ -56,7 +59,7 @@ export function Player({ stream, viewers, canClip }: PlayerProps) {
         <Thumbnail tone={stream.tone} radius="lg">
           <HlsVideo
             ref={videoRef}
-            src={stream.playbackUrl}
+            src={source}
             muted={muted}
             paused={paused}
             label={`Эфир ${stream.channel.name}`}
@@ -85,6 +88,9 @@ export function Player({ stream, viewers, canClip }: PlayerProps) {
           onJumpToLive={jumpToLive}
           onToggleFullscreen={toggleFullscreen}
           clipChannel={canClip ? stream.channel.slug : null}
+          qualities={stream.qualities}
+          quality={source}
+          onQualityChange={setQuality}
         />
       </div>
     </div>

@@ -72,6 +72,7 @@ export const api = {
   resolveReport: (id: string, action: "dismiss" | "delete_message" | "ban_user") =>
     call<{ ok: true }>(`/api/admin/reports/${id}/resolve`, "POST", { action }),
   savePushKey: (data: { keyId: string; teamId: string; privateKey: string }) => call<PushStatus>("/api/admin/push", "PUT", data),
+  setTranscode: (enabled: boolean) => call<{ enabled: boolean }>("/api/admin/transcode", "PUT", { enabled }),
   testPush: () => call<{ devices: number; sent: number }>("/api/admin/push/test", "POST", {}),
 };
 

@@ -18,9 +18,13 @@ interface PlayerControlsProps {
   onToggleFullscreen: () => void;
   /** Канал — для кнопки «Клип»; без входа кнопки нет. */
   clipChannel: string | null;
+  qualities: { label: string; url: string }[];
+  /** Адрес выбранного качества. */
+  quality: string;
+  onQualityChange: (url: string) => void;
 }
 
-/** Панель управления под видео: пауза, звук, возврат к прямому эфиру, клип, полный экран. */
+/** Панель управления под видео: пауза, звук, возврат к прямому эфиру, качество, клип, полный экран. */
 export function PlayerControls({
   paused,
   muted,
@@ -31,6 +35,9 @@ export function PlayerControls({
   onJumpToLive,
   onToggleFullscreen,
   clipChannel,
+  qualities,
+  quality,
+  onQualityChange,
 }: PlayerControlsProps) {
   return (
     <div className={styles.controls}>
@@ -59,6 +66,18 @@ export function PlayerControls({
 
       <span className={styles.spacer} />
 
+      {qualities.length > 1 && (
+        <label className={styles.quality}>
+          <span className="visually-hidden">Качество</span>
+          <select value={quality} onChange={(event) => onQualityChange(event.target.value)} className={styles.qualitySelect}>
+            {qualities.map((q) => (
+              <option key={q.url} value={q.url}>
+                {q.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {clipChannel && <ClipButton channelSlug={clipChannel} />}
       <Button variant="soft" icon="multiview" href="/multiview" className={styles.wideOnly}>Мультиэфир</Button>
       <Button variant="soft" icon="fullscreen" aria-label="Во весь экран" onClick={onToggleFullscreen} />
