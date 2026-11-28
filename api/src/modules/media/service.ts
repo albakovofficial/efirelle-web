@@ -1,5 +1,6 @@
 import type { AppContext } from "../../context.js";
 import type { PushService } from "../push/service.js";
+import type { StatsService } from "../stats/service.js";
 import type { Transcoder } from "./transcoder.js";
 
 /** Эфиры приходят в медиасервер по адресу live/<имя канала>. */
@@ -15,6 +16,7 @@ export class LiveService {
     private readonly ctx: AppContext,
     private readonly push: PushService,
     private readonly transcoder: Transcoder,
+    private readonly stats: StatsService,
   ) {}
 
   /** Проверка ключа при подключении OBS. */
@@ -93,16 +95,18 @@ export class LiveService {
     for (const username of ready) await this.start(username);
   }
 
-  /** Обновляет пик зрителей у идущих эфиров. */
-  async recordPeaks(): Promise<void> {
+  /** Раз в полминуты: пик зрителей идущих эфиров и точка для графика статистики. */
+  async recordViewers(): Promise<void> {
     const live = await this.ctx.db.rows<{ user_id: string; current_session_id: string }>(
       "SELECT user_id, current_session_id::text FROM channels WHERE current_session_id IS NOT NULL",
     );
-    for (const row of live) {
+    const samples = live.map((row) => ({ sessionId: row.current_session_id, viewers: this.ctx.hub.viewers(row.user_id) }));
+    for (const { sessionId, viewers } of samples) {
       await this.ctx.db.pool.query("UPDATE stream_sessions SET peak_viewers = GREATEST(peak_viewers, $1) WHERE id = $2", [
-        this.ctx.hub.viewers(row.user_id),
-        row.current_session_id,
+        viewers,
+        sessionId,
       ]);
     }
+    await this.stats.sample(samples);
   }
 }

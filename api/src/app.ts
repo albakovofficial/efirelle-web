@@ -20,10 +20,14 @@ import { MomentService } from "./modules/moments/service.js";
 import { registerPredictionRoutes } from "./modules/predictions/routes.js";
 import { registerProfileRoutes } from "./modules/profile/routes.js";
 import { ProfileService } from "./modules/profile/service.js";
+import { registerModerationRoutes } from "./modules/moderation/routes.js";
+import { ModerationService } from "./modules/moderation/service.js";
 import { registerPushRoutes } from "./modules/push/routes.js";
 import { registerRecordingRoutes } from "./modules/recordings/routes.js";
 import { RecordingService } from "./modules/recordings/service.js";
 import { PushService } from "./modules/push/service.js";
+import { registerStatsRoutes } from "./modules/stats/routes.js";
+import { StatsService } from "./modules/stats/service.js";
 import { PredictionService } from "./modules/predictions/service.js";
 import { registerScheduleRoutes } from "./modules/schedule/routes.js";
 import { ScheduleService } from "./modules/schedule/service.js";
@@ -36,6 +40,7 @@ export interface Services {
   push: PushService;
   schedule: ScheduleService;
   recordings: RecordingService;
+  stats: StatsService;
 }
 
 /** Собирает приложение: плагины, определение пользователя, все модули. Используется сервером и тестами. */
@@ -87,9 +92,11 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   const channels = new ChannelRepository(ctx.db, ctx.hub, ctx.config, transcoder);
   const moments = new MomentService(ctx, channels);
   const predictions = new PredictionService(ctx, moments);
-  const chat = new ChatService(ctx, moments);
+  const moderation = new ModerationService(ctx);
+  const chat = new ChatService(ctx, moments, moderation);
   const push = new PushService(ctx);
-  const live = new LiveService(ctx, push, transcoder);
+  const stats = new StatsService(ctx);
+  const live = new LiveService(ctx, push, transcoder, stats);
   const profile = new ProfileService(ctx);
   const schedule = new ScheduleService(ctx, channels, push);
   const recordings = new RecordingService(ctx, channels);
@@ -97,10 +104,12 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
   app.get("/api/health", async () => ({ ok: true }));
   registerAuthRoutes(app, ctx);
   registerDiscoveryRoutes(app, ctx, channels, moments, schedule, recordings);
-  registerChannelRoutes(app, ctx, channels, { moments, predictions, chat, profile, schedule, recordings });
+  registerChannelRoutes(app, ctx, channels, { moments, predictions, chat, profile, schedule, recordings, moderation });
   registerChatRoutes(app, ctx, channels, chat);
   registerPredictionRoutes(app, predictions);
-  registerStudioRoutes(app, ctx, channels, { predictions, moments, chat, profile, schedule });
+  registerStudioRoutes(app, ctx, channels, { predictions, moments, chat, profile, schedule, moderation });
+  registerModerationRoutes(app, moderation);
+  registerStatsRoutes(app, stats);
   registerAdminRoutes(app, ctx, transcoder);
   registerMediaRoutes(app, live, transcoder);
   registerPushRoutes(app, ctx, push);
@@ -112,5 +121,5 @@ export async function buildApp(ctx: AppContext, options: { logger?: boolean } = 
     transcoder.stopAll();
   });
 
-  return { app, services: { live, push, schedule, recordings } };
+  return { app, services: { live, push, schedule, recordings, stats } };
 }

@@ -10,6 +10,7 @@ import type { ChatService } from "../chat/service.js";
 import type { MomentService } from "../moments/service.js";
 import type { PredictionService } from "../predictions/service.js";
 import type { ProfileService } from "../profile/service.js";
+import type { ModerationService } from "../moderation/service.js";
 import type { ScheduleService } from "../schedule/service.js";
 
 const cleanText = (max: number, message: string) =>
@@ -49,9 +50,10 @@ export function registerStudioRoutes(
     chat: ChatService;
     profile: ProfileService;
     schedule: ScheduleService;
+    moderation: ModerationService;
   },
 ): void {
-  const { predictions, moments, chat, profile, schedule } = services;
+  const { predictions, moments, chat, profile, schedule, moderation } = services;
   app.get("/api/studio", async (request) => {
     const viewer = requireViewer(request);
     const channel = await channels.byId(viewer.id);
@@ -75,6 +77,7 @@ export function registerStudioRoutes(
       about: await profile.about(viewer.id),
       emotes: await profile.emotes(viewer.id),
       schedule: await schedule.ofChannel(viewer.id, viewer.id),
+      moderation: await moderation.settings(viewer.id),
     };
   });
 

@@ -1,6 +1,7 @@
 import type { AppContext, Viewer } from "../../context.js";
 import { badRequest, forbidden, HttpError, notFound, tooManyRequests } from "../../lib/http.js";
 import { isTextAllowed } from "../../lib/profanity.js";
+import type { ModerationService } from "../moderation/service.js";
 import type { MomentService } from "../moments/service.js";
 
 export const MAX_MESSAGE_LENGTH = 500;
@@ -62,6 +63,7 @@ export class ChatService {
   constructor(
     private readonly ctx: AppContext,
     private readonly moments: MomentService,
+    private readonly moderation: ModerationService,
   ) {}
 
   async history(channelId: string, viewerId: string | null): Promise<ChatMessageDto[]> {
@@ -100,6 +102,8 @@ export class ChatService {
 
     const now = Date.now();
     if (now - (this.lastMessageAt.get(viewer.id) ?? 0) < MESSAGE_INTERVAL_MS) throw tooManyRequests("Не так быстро");
+    // Правила канала: только подписчики, медленный режим, запрещённые слова.
+    await this.moderation.check(viewer, channelId, text);
 
     this.lastMessageAt.set(viewer.id, now);
     const inserted = await this.ctx.db.one<{ id: string }>(
