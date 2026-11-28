@@ -1,37 +1,49 @@
 import { CategoryCard } from "@/components/category/CategoryCard/CategoryCard";
 import { ClipCard } from "@/components/clips/ClipCard/ClipCard";
 import { FeaturedHero } from "@/components/home/FeaturedHero/FeaturedHero";
-import { FollowingStrip } from "@/components/home/FollowingStrip/FollowingStrip";
+import { GoLiveBanner } from "@/components/home/GoLiveBanner/GoLiveBanner";
 import { StreamsForYou } from "@/components/home/StreamsForYou/StreamsForYou";
 import { FollowingSidebar } from "@/components/layout/FollowingSidebar/FollowingSidebar";
 import { PageShell } from "@/components/layout/PageShell/PageShell";
 import { MomentCard } from "@/components/moments/MomentCard/MomentCard";
 import { ScheduleCard } from "@/components/schedule/ScheduleCard";
+import { StreamCard } from "@/components/stream/StreamCard/StreamCard";
 import { AutoGrid } from "@/components/ui/AutoGrid/AutoGrid";
-import { Button } from "@/components/ui/Button/Button";
-import { Section, SectionEmpty } from "@/components/ui/Section/Section";
+import { Section } from "@/components/ui/Section/Section";
 import { getCurrentViewer, getHomeFeed } from "@/data/api";
 
-/** Главная: витрина, анонсы, живые моменты, клипы, категории, персональная лента. */
+/**
+ * Главная: отслеживаемые каналы в эфире, витрина (или приглашение в эфир), категории-обложки,
+ * анонсы, живые моменты, клипы и персональная лента.
+ */
 export default async function HomePage() {
   const [feed, viewer] = await Promise.all([getHomeFeed(), getCurrentViewer()]);
   const following = feed.following.flatMap((status) => (status.stream ? [status.stream] : []));
   const [mainStream, ...otherFeatured] = feed.featured;
+  // Где сейчас смотрят больше всего — первыми (сортировка устойчивая: при равенстве порядок сервера).
+  const categories = [...feed.categories].sort((a, b) => b.viewers - a.viewers);
 
   return (
     <PageShell sidebar={<FollowingSidebar streams={following} />}>
-      <FollowingStrip streams={following} />
-
-      {mainStream ? (
-        <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} />
-      ) : (
-        <Section id="empty" title="Сейчас никто не в эфире">
-          <SectionEmpty>Станьте первым: в студии есть адрес сервера и ключ для OBS или любого приложения с RTMP.</SectionEmpty>
-          <Button href="/studio" variant="dark">
-            Открыть студию
-          </Button>
+      {following.length > 0 && (
+        <Section id="following-live" title="Ваши каналы в эфире" action={{ label: "Все подписки", href: "/following" }}>
+          <AutoGrid min={280}>
+            {following.slice(0, 4).map((stream) => (
+              <StreamCard key={stream.id} stream={stream} />
+            ))}
+          </AutoGrid>
         </Section>
       )}
+
+      {mainStream ? <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} /> : <GoLiveBanner />}
+
+      <Section id="categories" title="Категории" action={{ label: "Смотреть все", href: "/browse" }}>
+        <AutoGrid min={150}>
+          {categories.map((category) => (
+            <CategoryCard key={category.id} category={category} />
+          ))}
+        </AutoGrid>
+      </Section>
 
       {feed.upcoming.length > 0 && (
         <Section id="upcoming" title="Скоро в эфире" subtitle="Анонсы авторов — нажмите «Напомнить», и мы пришлём уведомление">
@@ -66,14 +78,6 @@ export default async function HomePage() {
           </AutoGrid>
         </Section>
       )}
-
-      <Section id="categories" title="Категории" action={{ label: "Смотреть все", href: "/browse" }}>
-        <AutoGrid min={140}>
-          {feed.categories.slice(0, 8).map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
-        </AutoGrid>
-      </Section>
 
       {feed.forYou.length > 0 && <StreamsForYou streams={feed.forYou} />}
     </PageShell>

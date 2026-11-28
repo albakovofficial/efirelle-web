@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "../Icon/Icon";
 import styles from "./Button.module.css";
 
-type Variant = "primary" | "dark" | "secondary" | "soft" | "glass" | "ghost";
+type Variant = "primary" | "dark" | "live" | "secondary" | "soft" | "glass" | "ghost";
 type Size = "sm" | "md" | "lg";
 
 interface CommonProps {

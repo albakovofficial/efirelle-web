@@ -25,9 +25,32 @@
   color: var(--tone-ink);
 }
 
+.icon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--tone-ink);
+}
+
 .viewers {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 700;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-live);
+}
+
+.offline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
 }
 
 .group {
