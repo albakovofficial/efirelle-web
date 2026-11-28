@@ -28,9 +28,9 @@ export function MobileNav() {
   return (
     <nav aria-label="Нижняя навигация" className={styles.bar}>
       {first && renderLink(first)}
-      <button type="button" aria-label="Начать эфир" className={styles.goLive}>
+      <Link href="/studio" aria-label="Студия: начать эфир" className={styles.goLive}>
         <Icon name="plus" size={20} />
-      </button>
+      </Link>
       {rest.map(renderLink)}
     </nav>
   );

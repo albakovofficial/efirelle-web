@@ -1,4 +1,4 @@
-/** Доменные типы платформы. Единственный источник правды для формы данных. */
+/** Доменные типы платформы. Совпадают с ответами API (api/src/modules). */
 
 export type Tone = "ink" | "lavender" | "peach" | "mint" | "sky" | "butter" | "rose";
 
@@ -16,6 +16,7 @@ export interface Stream {
   channel: Channel;
   title: string;
   category: string;
+  categoryId: string;
   tags: string[];
   viewers: number;
   /** Сколько секунд идёт эфир. */
@@ -24,8 +25,10 @@ export interface Stream {
   latencySeconds: number;
   /** Короткая строка о том, что происходит сейчас (для боковой панели). */
   status: string;
-  /** Тон обложки, пока нет настоящего превью. */
+  /** Тон обложки, пока нет кадра-превью. */
   tone: Tone;
+  /** Адрес HLS-потока. */
+  playbackUrl: string;
 }
 
 export type MomentKind = "raid" | "prediction" | "chatPeak" | "giveaway" | "highlight";
@@ -36,7 +39,7 @@ export interface Moment {
   kind: MomentKind;
   text: string;
   channel: Channel;
-  /** Человекочитаемое время: «2 мин назад», «идёт сейчас». */
+  /** Человекочитаемое время: «2 мин назад». */
   when: string;
   /** Смещение от начала эфира — для перемотки. */
   offsetSeconds: number;
@@ -53,37 +56,64 @@ export interface Category {
   name: string;
   group: string;
   viewers: number;
+  liveCount: number;
   tone: Tone;
 }
 
-export type ChatBadge =
-  | { type: "moderator" }
-  | { type: "vip" }
-  | { type: "newcomer" }
-  | { type: "subscriber"; months: number };
+export type ChatBadge = { type: "broadcaster" } | { type: "moderator" } | { type: "newcomer" };
 
-export type ChatEntry =
-  | { kind: "message"; id: string; author: string; tone: Tone; badge?: ChatBadge; text: string }
-  | { kind: "event"; id: string; tone: Tone; text: string };
+export interface ChatMessage {
+  kind: "message";
+  id: string;
+  author: string;
+  authorSlug: string;
+  authorId: string;
+  tone: Tone;
+  badge?: ChatBadge;
+  text: string;
+  createdAt: string;
+}
+
+/** Служебное событие в ленте чата (рейд, начало эфира). Живёт только на экране. */
+export interface ChatEvent {
+  kind: "event";
+  id: string;
+  tone: Tone;
+  text: string;
+  /** Ссылка из события — например, на канал, куда ушёл рейд. */
+  link?: { href: string; label: string };
+}
+
+export type ChatEntry = ChatMessage | ChatEvent;
 
 export interface PredictionOutcome {
   id: string;
   label: string;
   percent: number;
+  votes: number;
   tone: Tone;
 }
 
 export interface Prediction {
   id: string;
   question: string;
+  /** open — идёт приём ответов; locked — время вышло, ждём итог; resolved — итог подведён. */
+  status: "open" | "locked" | "resolved" | "cancelled";
   endsInSeconds: number;
   participants: number;
   outcomes: PredictionOutcome[];
+  myOutcomeId: string | null;
+  winningOutcomeId: string | null;
 }
 
+/** Вошедший пользователь. */
 export interface Viewer {
-  name: string;
+  id: string;
+  email: string;
+  username: string;
+  displayName: string;
   initials: string;
+  role: "user" | "admin";
   tone: Tone;
   sparks: number;
 }
@@ -93,4 +123,47 @@ export interface SearchResults {
   streams: Stream[];
   channels: ChannelStatus[];
   categories: Category[];
+}
+
+/** Всё для страницы эфира одним запросом. */
+export interface ChannelWatch extends ChannelStatus {
+  isFollowing: boolean;
+  isOwner: boolean;
+  markers: Moment[];
+  prediction: Prediction | null;
+  chat: ChatMessage[];
+}
+
+export interface HomeFeed {
+  following: ChannelStatus[];
+  featured: Stream[];
+  moments: Moment[];
+  categories: Category[];
+  forYou: Stream[];
+}
+
+export interface Studio extends ChannelStatus {
+  settings: { title: string; categoryId: string; tags: string[] };
+  ingest: { server: string; streamKey: string };
+  prediction: Prediction | null;
+  bans: { slug: string; name: string; until: string | null }[];
+}
+
+export type ReportReason = "spam" | "harassment" | "hate" | "sexual" | "violence" | "other";
+
+export interface AdminReport {
+  id: string;
+  reason: ReportReason;
+  messageText: string | null;
+  messageId: string | null;
+  createdAt: string;
+  target: { id: string; slug: string; name: string };
+  reporter: string | null;
+  channel: string | null;
+}
+
+export interface BlockedUser {
+  id: string;
+  slug: string;
+  name: string;
 }

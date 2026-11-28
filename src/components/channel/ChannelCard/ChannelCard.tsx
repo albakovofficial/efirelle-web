@@ -7,14 +7,11 @@ import { channelHref } from "@/lib/routes";
 import type { ChannelStatus } from "@/types";
 import styles from "./ChannelCard.module.css";
 
-/**
- * Карточка канала: аватар, имя, подписчики и статус.
- * Канал в эфире — ссылка на эфир; канал не в сети — просто карточка (страницы канала пока нет).
- */
+/** Карточка канала: аватар, имя, подписчики и статус. Ведёт на страницу канала. */
 export function ChannelCard({ channel, stream }: ChannelStatus) {
   const live = stream !== null;
-  const content = (
-    <>
+  return (
+    <Link href={channelHref(channel.slug)} className={`${styles.card} ${styles.link} ${live ? "" : styles.idle}`}>
       <Avatar initials={channel.initials} tone={channel.tone} size="xl" ring={live ? "live" : undefined} />
       <span className={styles.text}>
         <span className={styles.name}>
@@ -33,14 +30,6 @@ export function ChannelCard({ channel, stream }: ChannelStatus) {
           <span className={styles.offline}>Не в сети</span>
         )}
       </span>
-    </>
-  );
-
-  return live ? (
-    <Link href={channelHref(channel.slug)} className={`${styles.card} ${styles.link}`}>
-      {content}
     </Link>
-  ) : (
-    <div className={`${styles.card} ${styles.idle}`}>{content}</div>
   );
 }

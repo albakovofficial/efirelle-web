@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/ui/PageHeader/PageHeader";
 import { MULTIVIEW_MAX } from "@/config/multiview";
 import { Section, SectionEmpty } from "@/components/ui/Section/Section";
 import { Thumbnail } from "@/components/ui/Thumbnail/Thumbnail";
-import { getCategory, getFollowingLive, getStreamsByCategory } from "@/data/api";
+import { getCategoryWithStreams, getFollowingLive } from "@/data/api";
 import { formatCount, STREAM_FORMS, VIEWER_FORMS } from "@/lib/format";
 import { multiviewHref } from "@/lib/routes";
 
@@ -19,18 +19,18 @@ interface CategoryPageProps {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category: id } = await params;
-  const category = await getCategory(id);
-  if (!category) return { title: "Категория не найдена" };
+  const found = await getCategoryWithStreams(id);
+  if (!found) return { title: "Категория не найдена" };
+  const { category } = found;
   return { title: category.name, description: `${category.name}: эфиры, которые идут сейчас на Efirelle.` };
 }
 
 /** Категория: обложка, сколько зрителей, эфиры внутри. */
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category: id } = await params;
-  const category = await getCategory(id);
-  if (!category) notFound();
-
-  const [following, streams] = await Promise.all([getFollowingLive(), getStreamsByCategory(id)]);
+  const [found, following] = await Promise.all([getCategoryWithStreams(id), getFollowingLive()]);
+  if (!found) notFound();
+  const { category, streams } = found;
   const slugsForMultiview = streams.slice(0, MULTIVIEW_MAX).map((s) => s.channel.slug);
 
   return (

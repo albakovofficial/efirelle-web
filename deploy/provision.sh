@@ -200,7 +200,12 @@ fi
 for unit in postgresql efirelle-api mediamtx efirelle-web nginx; do
   step "$unit: $(systemctl is-active "$unit")"
 done
-HEALTH=$(curl -fsS -m 5 http://127.0.0.1:4000/api/health 2>/dev/null || echo нет)
+# Служба могла только что перезапуститься — даём ей до 15 секунд.
+for _ in $(seq 15); do
+  HEALTH=$(curl -fsS -m 2 http://127.0.0.1:4000/api/health 2>/dev/null) && break
+  HEALTH=нет
+  sleep 1
+done
 step "API /api/health: $HEALTH"
 step "MediaMTX API: $(curl -fsS -m 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:9997/v3/paths/list 2>/dev/null || echo нет)"
 grep -q '^SMTP_PASSWORD=.\+' "$API_ENV" && step "Почта: SMTP настроен" || step "Почта: SMTP_PASSWORD не задан — восстановление пароля по почте выключено"

@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button/Button";
-import { Icon } from "@/components/ui/Icon/Icon";
 import { SparksBalance } from "@/components/ui/SparksBalance/SparksBalance";
 import styles from "./ChatComposer.module.css";
 
@@ -10,7 +9,8 @@ const MAX_MESSAGE_LENGTH = 500;
 
 interface ChatComposerProps {
   sparks: number;
-  onSend: (text: string) => void;
+  /** Вернёт false, если сообщение не ушло (нет связи) — тогда текст остаётся в поле. */
+  onSend: (text: string) => boolean;
 }
 
 /** Поле ввода сообщения и баланс искр. */
@@ -20,9 +20,7 @@ export function ChatComposer({ sparks, onSend }: ChatComposerProps) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!trimmed) return;
-    onSend(trimmed);
-    setText("");
+    if (trimmed && onSend(trimmed)) setText("");
   }
 
   return (
@@ -38,13 +36,11 @@ export function ChatComposer({ sparks, onSend }: ChatComposerProps) {
             autoComplete="off"
             className={styles.input}
           />
-          <Icon name="smile" size={20} className={styles.emote} />
         </label>
         <Button type="submit" variant="primary" icon="send" aria-label="Отправить" disabled={!trimmed} />
       </div>
       <div className={styles.footer}>
         <SparksBalance amount={sparks} withLabel />
-        <Button variant="soft" size="sm">Награды канала</Button>
       </div>
     </form>
   );

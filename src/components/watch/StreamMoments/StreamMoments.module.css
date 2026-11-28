@@ -3,15 +3,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border: 0;
   border-radius: 18px;
   background: var(--color-surface);
-  text-align: left;
-  transition: background-color 0.15s ease;
-}
-
-.chip:hover {
-  background: var(--tone-surface);
 }
 
 .dot {

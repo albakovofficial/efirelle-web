@@ -17,3 +17,8 @@ export function searchHref(query: string): string {
 export function multiviewHref(slugs: readonly string[]): string {
   return slugs.length > 0 ? `/multiview?c=${slugs.map(encodeURIComponent).join(",")}` : "/multiview";
 }
+
+/** Вход с возвратом на текущую страницу после него. */
+export function loginHref(next?: string): string {
+  return next ? `/login?next=${encodeURIComponent(next)}` : "/login";
+}

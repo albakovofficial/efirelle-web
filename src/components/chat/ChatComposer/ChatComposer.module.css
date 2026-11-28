@@ -36,11 +36,6 @@
   font-size: 15px;
 }
 
-.emote {
-  flex: none;
-  color: var(--color-muted);
-}
-
 .footer {
   display: flex;
   align-items: center;

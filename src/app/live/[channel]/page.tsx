@@ -5,49 +5,39 @@ import { FollowingSidebar } from "@/components/layout/FollowingSidebar/Following
 import { PageShell } from "@/components/layout/PageShell/PageShell";
 import { ChannelBar } from "@/components/watch/ChannelBar/ChannelBar";
 import { StreamStage } from "@/components/watch/StreamStage/StreamStage";
-import {
-  getActivePrediction,
-  getChatHistory,
-  getCurrentViewer,
-  getFollowingLive,
-  getStreamByChannel,
-  getStreamMarkers,
-} from "@/data/api";
+import { WatchRoomProvider } from "@/components/watch/WatchRoom/WatchRoom";
+import { getChannelWatch, getCurrentViewer, getFollowingLive } from "@/data/api";
 
 interface WatchPageProps {
   params: Promise<{ channel: string }>;
 }
 
 export async function generateMetadata({ params }: WatchPageProps): Promise<Metadata> {
-  const { channel } = await params;
-  const stream = await getStreamByChannel(channel);
-  if (!stream) return { title: "Канал не найден" };
-  return { title: `${stream.channel.name} — ${stream.title}`, description: `${stream.category} · в эфире на Efirelle` };
+  const watch = await getChannelWatch((await params).channel);
+  if (!watch) return { title: "Канал не найден" };
+  const { channel, stream } = watch;
+  return stream
+    ? { title: `${channel.name} — ${stream.title}`, description: `${stream.category} · в эфире на Efirelle` }
+    : { title: channel.name, description: `Канал ${channel.name} на Efirelle` };
 }
 
-/** Страница эфира: плеер с перемоткой и моментами, информация о канале, чат. */
+/** Страница канала: эфир с чатом или заставка «не в сети». */
 export default async function WatchPage({ params }: WatchPageProps) {
   const { channel } = await params;
-  const stream = await getStreamByChannel(channel);
-  if (!stream) notFound();
-
-  const [markers, chat, prediction, following, viewer] = await Promise.all([
-    getStreamMarkers(channel),
-    getChatHistory(stream.id),
-    getActivePrediction(stream.id),
-    getFollowingLive(),
-    getCurrentViewer(),
-  ]);
+  const [watch, viewer, following] = await Promise.all([getChannelWatch(channel), getCurrentViewer(), getFollowingLive()]);
+  if (!watch) notFound();
 
   return (
-    <PageShell
-      dense
-      sidebar={<FollowingSidebar streams={following} defaultCollapsed activeSlug={channel} />}
-      aside={<ChatPanel initialEntries={chat} prediction={prediction} viewer={viewer} />}
-    >
-      <StreamStage stream={stream} markers={markers}>
-        <ChannelBar stream={stream} />
-      </StreamStage>
-    </PageShell>
+    <WatchRoomProvider watch={watch} viewer={viewer}>
+      <PageShell
+        dense
+        sidebar={<FollowingSidebar streams={following} defaultCollapsed activeSlug={watch.channel.slug} />}
+        aside={<ChatPanel />}
+      >
+        <StreamStage>
+          <ChannelBar />
+        </StreamStage>
+      </PageShell>
+    </WatchRoomProvider>
   );
 }

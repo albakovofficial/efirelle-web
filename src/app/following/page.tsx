@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/Button/Button";
 import { PageHeader } from "@/components/ui/PageHeader/PageHeader";
 import { MULTIVIEW_MAX } from "@/config/multiview";
 import { Section, SectionEmpty } from "@/components/ui/Section/Section";
-import { getFollowedChannels, getFollowingLive } from "@/data/api";
+import { getCurrentViewer, getFollowedChannels } from "@/data/api";
 import { CHANNEL_FORMS, formatCount } from "@/lib/format";
-import { multiviewHref } from "@/lib/routes";
+import { loginHref, multiviewHref } from "@/lib/routes";
 
 export const metadata: Metadata = {
   title: "Отслеживаемые",
@@ -19,7 +19,21 @@ export const metadata: Metadata = {
 
 /** Отслеживаемые: эфиры подписок крупно, ниже — все каналы со статусом. */
 export default async function FollowingPage() {
-  const [live, followed] = await Promise.all([getFollowingLive(), getFollowedChannels()]);
+  const [viewer, followed] = await Promise.all([getCurrentViewer(), getFollowedChannels()]);
+  const live = followed.flatMap((item) => (item.stream ? [item.stream] : []));
+
+  if (!viewer) {
+    return (
+      <PageShell sidebar={<FollowingSidebar streams={[]} />}>
+        <PageHeader title="Отслеживаемые" subtitle="Каналы, на которые вы подписаны" />
+        <SectionEmpty>Войдите, чтобы отслеживать каналы и видеть, кто из них сейчас в эфире.</SectionEmpty>
+        <Button href={loginHref("/following")} variant="dark">
+          Войти
+        </Button>
+      </PageShell>
+    );
+  }
+
   const offline = followed.filter((item) => item.stream === null);
   const slugsForMultiview = live.slice(0, MULTIVIEW_MAX).map((s) => s.channel.slug);
 

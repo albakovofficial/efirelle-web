@@ -6,53 +6,54 @@ import { FollowingSidebar } from "@/components/layout/FollowingSidebar/Following
 import { PageShell } from "@/components/layout/PageShell/PageShell";
 import { MomentCard } from "@/components/moments/MomentCard/MomentCard";
 import { AutoGrid } from "@/components/ui/AutoGrid/AutoGrid";
-import { Section } from "@/components/ui/Section/Section";
-import {
-  getFeaturedStreams,
-  getFollowingLive,
-  getLiveMoments,
-  getStreamsForYou,
-  getTopCategories,
-} from "@/data/api";
+import { Button } from "@/components/ui/Button/Button";
+import { Section, SectionEmpty } from "@/components/ui/Section/Section";
+import { getHomeFeed } from "@/data/api";
 
 /** Главная: витрина, живые моменты, категории, персональная лента. */
 export default async function HomePage() {
-  const [following, featured, moments, categories, forYou] = await Promise.all([
-    getFollowingLive(),
-    getFeaturedStreams(),
-    getLiveMoments(),
-    getTopCategories(),
-    getStreamsForYou(),
-  ]);
-  const [mainStream, ...otherFeatured] = featured;
+  const feed = await getHomeFeed();
+  const following = feed.following.flatMap((status) => (status.stream ? [status.stream] : []));
+  const [mainStream, ...otherFeatured] = feed.featured;
 
   return (
     <PageShell sidebar={<FollowingSidebar streams={following} />}>
       <FollowingStrip streams={following} />
 
-      {mainStream && <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} />}
+      {mainStream ? (
+        <FeaturedHero main={mainStream} others={otherFeatured.slice(0, 4)} />
+      ) : (
+        <Section id="empty" title="Сейчас никто не в эфире">
+          <SectionEmpty>Станьте первым: в студии есть адрес сервера и ключ для OBS или любого приложения с RTMP.</SectionEmpty>
+          <Button href="/studio" variant="dark">
+            Открыть студию
+          </Button>
+        </Section>
+      )}
 
-      <Section
-        id="moments"
-        title="Живые моменты"
-        subtitle="Что происходит в эфирах прямо сейчас — подключайтесь в самый разгар"
-      >
-        <AutoGrid min={230}>
-          {moments.map((moment) => (
-            <MomentCard key={moment.id} moment={moment} />
-          ))}
-        </AutoGrid>
-      </Section>
+      {feed.moments.length > 0 && (
+        <Section
+          id="moments"
+          title="Живые моменты"
+          subtitle="Что происходит в эфирах прямо сейчас — подключайтесь в самый разгар"
+        >
+          <AutoGrid min={230}>
+            {feed.moments.map((moment) => (
+              <MomentCard key={moment.id} moment={moment} />
+            ))}
+          </AutoGrid>
+        </Section>
+      )}
 
       <Section id="categories" title="Категории" action={{ label: "Смотреть все", href: "/browse" }}>
         <AutoGrid min={140}>
-          {categories.map((category) => (
+          {feed.categories.slice(0, 8).map((category) => (
             <CategoryCard key={category.id} category={category} />
           ))}
         </AutoGrid>
       </Section>
 
-      <StreamsForYou streams={forYou} />
+      {feed.forYou.length > 0 && <StreamsForYou streams={feed.forYou} />}
     </PageShell>
   );
 }

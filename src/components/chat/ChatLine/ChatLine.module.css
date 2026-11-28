@@ -1,7 +1,32 @@
 .message {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Кнопка действий видна при наведении, а на сенсорных экранах — всегда. */
+.message > :last-child:not(.body) {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.message:hover > :last-child:not(.body),
+.message:focus-within > :last-child:not(.body) {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .message > :last-child:not(.body) {
+    opacity: 1;
+  }
 }
 
 .badge {
@@ -26,4 +51,9 @@
   font-size: 14px;
   font-weight: 700;
   line-height: 1.45;
+}
+
+.eventLink {
+  color: inherit;
+  text-decoration: underline;
 }

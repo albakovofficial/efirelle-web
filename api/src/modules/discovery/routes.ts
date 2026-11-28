@@ -84,7 +84,7 @@ export function registerDiscoveryRoutes(app: FastifyInstance, ctx: AppContext, c
     return {
       query: q,
       streams: found.flatMap((status) => (status.stream ? [status.stream] : [])),
-      channels: found.map((status) => status.channel),
+      channels: found,
       categories: allCategories.filter((c) => normalizeQuery(c.name).includes(needle)),
     };
   });

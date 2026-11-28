@@ -1,26 +1,33 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import type { Moment, Stream } from "@/types";
+import type { ReactNode } from "react";
+import { Thumbnail } from "@/components/ui/Thumbnail/Thumbnail";
 import { Player } from "../Player/Player";
 import { StreamMoments } from "../StreamMoments/StreamMoments";
+import { useWatchRoom } from "../WatchRoom/WatchRoom";
+import styles from "./StreamStage.module.css";
 
-interface StreamStageProps {
-  stream: Stream;
-  markers: Moment[];
-  /** Блок между плеером и моментами (информация о канале). */
-  children?: ReactNode;
-}
-
-/** Хранит позицию просмотра и связывает плеер со списком моментов. */
-export function StreamStage({ stream, markers, children }: StreamStageProps) {
-  const [position, setPosition] = useState(stream.durationSeconds);
+/** Сцена эфира: плеер (или заставка «не в сети»), блок канала, моменты. */
+export function StreamStage({ children }: { children?: ReactNode }) {
+  const { watch, viewers, markers } = useWatchRoom();
+  const { stream, channel } = watch;
 
   return (
     <>
-      <Player stream={stream} markers={markers} position={position} onSeek={setPosition} />
+      {stream ? (
+        <Player stream={stream} viewers={viewers} />
+      ) : (
+        <div className={styles.offline}>
+          <Thumbnail tone={channel.tone} radius="lg">
+            <span className={styles.offlineText}>
+              <strong>{channel.name} сейчас не в эфире</strong>
+              <span>Страница обновится сама, когда эфир начнётся</span>
+            </span>
+          </Thumbnail>
+        </div>
+      )}
       {children}
-      <StreamMoments markers={markers} onSeek={setPosition} />
+      {stream && <StreamMoments markers={markers} />}
     </>
   );
 }

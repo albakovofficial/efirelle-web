@@ -1,0 +1,31 @@
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.target {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.target a {
+  color: var(--color-accent);
+}
+
+.quote {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 3px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

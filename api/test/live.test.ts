@@ -138,6 +138,6 @@ describe("Эфиры, подписки, прогнозы, модерация", (
 
   test("поиск находит канал по имени без учёта регистра", async () => {
     const result = (await t.app.inject({ method: "GET", url: "/api/search?q=ТИМУР" })).json();
-    assert.equal(result.channels[0].slug, "timur");
+    assert.equal(result.channels[0].channel.slug, "timur");
   });
 });

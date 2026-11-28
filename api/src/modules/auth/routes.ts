@@ -3,6 +3,8 @@ import { z } from "zod";
 import type { AppContext, Viewer } from "../../context.js";
 import { hashPassword, randomCode, randomToken, sha256, verifyPassword } from "../../lib/crypto.js";
 import { badRequest, conflict, HttpError, parse, unauthorized } from "../../lib/http.js";
+import { isTextAllowed } from "../../lib/profanity.js";
+import { initials } from "../../lib/text.js";
 import { endSession, requireViewer, startSession, viewerById } from "./sessions.js";
 
 const TONES = ["lavender", "peach", "mint", "sky", "butter", "rose"] as const;
@@ -15,8 +17,14 @@ const username = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^[a-z0-9_]{3,24}$/, "Имя канала: 3–24 символа, латиница, цифры и _");
-const displayName = z.string().trim().min(1, "Укажите имя").max(40, "Имя — до 40 символов");
+  .regex(/^[a-z0-9_]{3,24}$/, "Имя канала: 3–24 символа, латиница, цифры и _")
+  .refine(isTextAllowed, "Такой адрес канала занять нельзя");
+const displayName = z
+  .string()
+  .trim()
+  .min(1, "Укажите имя")
+  .max(40, "Имя — до 40 символов")
+  .refine(isTextAllowed, "Имя нарушает правила сообщества");
 
 const registerBody = z.object({ email, password, username, displayName });
 const loginBody = z.object({ email, password: z.string().min(1, "Введите пароль") });
@@ -31,6 +39,7 @@ export function viewerDto(viewer: Viewer) {
     email: viewer.email,
     username: viewer.username,
     displayName: viewer.displayName,
+    initials: initials(viewer.displayName),
     role: viewer.role,
     tone: viewer.tone,
     sparks: viewer.sparks,

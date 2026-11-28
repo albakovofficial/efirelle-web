@@ -62,3 +62,34 @@
     height: 560px;
   }
 }
+
+.offline {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.notice {
+  margin: 0 14px 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.guest {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px 18px;
+  border-top: 1px solid var(--color-line);
+  font-size: 14px;
+  color: var(--color-muted);
+}

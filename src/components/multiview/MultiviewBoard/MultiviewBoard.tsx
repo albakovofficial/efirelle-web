@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { Section, SectionEmpty } from "@/components/ui/Section/Section";
 import { Thumbnail } from "@/components/ui/Thumbnail/Thumbnail";
+import { HlsVideo } from "@/components/watch/HlsVideo/HlsVideo";
 import { MULTIVIEW_MAX } from "@/config/multiview";
 import { formatCompact, formatCount, VIEWER_FORMS } from "@/lib/format";
 import { channelHref, multiviewHref } from "@/lib/routes";
@@ -24,12 +25,13 @@ interface MultiviewBoardProps {
 
 /**
  * Сетка мультиэфира и список для добавления. Выбор хранится в адресе (?c=…),
- * чтобы экран можно было обновить или отправить ссылкой. Звук — только у одной плитки.
+ * чтобы экран можно было обновить или отправить ссылкой. Звук — только у одной плитки, которую выбрал зритель.
  */
 export function MultiviewBoard({ streams, initialSlugs }: MultiviewBoardProps) {
   const router = useRouter();
   const [slugs, setSlugs] = useState(initialSlugs);
-  const [audioSlug, setAudioSlug] = useState<string | null>(initialSlugs[0] ?? null);
+  // Браузер не даёт включить звук без нажатия, поэтому сначала все плитки без звука.
+  const [audioSlug, setAudioSlug] = useState<string | null>(null);
 
   const bySlug = useMemo(() => new Map(streams.map((s) => [s.channel.slug, s])), [streams]);
   const selected = slugs.flatMap((slug) => bySlug.get(slug) ?? []);
@@ -63,6 +65,7 @@ export function MultiviewBoard({ streams, initialSlugs }: MultiviewBoardProps) {
             return (
               <li key={stream.id} className={`${styles.tile} ${hasAudio ? styles.tileAudio : ""}`}>
                 <Thumbnail tone={stream.tone} radius="lg">
+                  <HlsVideo src={stream.playbackUrl} muted={!hasAudio} label={`Эфир ${channel.name}`} />
                   <span className={styles.topLeft}>
                     <LiveBadge short size="sm" />
                     <Badge variant="glass" size="sm">{formatCount(stream.viewers, VIEWER_FORMS)}</Badge>
