@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChannelAbout, ChannelLink, ChannelStatus, Clip, Emote, Prediction, PushStatus, ReportReason, ScheduledStream, Studio, Viewer } from "@/types";
+import type { ChannelAbout, ChannelLink, ChannelStatus, Clip, Emote, ModerationSettings, Prediction, PushStatus, ReportReason, ScheduledStream, Studio, Viewer } from "@/types";
 import { apiRequest } from "./api-request";
 
 export { ApiError } from "./api-request";
@@ -55,6 +55,8 @@ export const api = {
   removeAvatar: () => call<{ avatarUrl: null }>("/api/me/avatar", "DELETE"),
   uploadBanner: (file: File) => upload<{ bannerUrl: string }>("/api/studio/banner", file),
   removeBanner: () => call<{ bannerUrl: null }>("/api/studio/banner", "DELETE"),
+  updateModeration: (patch: Partial<Pick<ModerationSettings, "slowModeSeconds" | "followersOnly" | "blockedWords">>) =>
+    call<ModerationSettings>("/api/studio/moderation", "PATCH", patch),
   updateAbout: (data: { description: string; links: ChannelLink[] }) => call<ChannelAbout>("/api/studio/profile", "PATCH", data),
   addEmote: (code: string, file: File) => upload<{ emote: Emote }>(`/api/studio/emotes?code=${encodeURIComponent(code)}`, file, "POST"),
   removeEmote: (code: string) => call<{ ok: true }>(`/api/studio/emotes/${code}`, "DELETE"),

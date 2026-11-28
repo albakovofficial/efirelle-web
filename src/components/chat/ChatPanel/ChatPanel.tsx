@@ -4,11 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useWatchRoom } from "@/components/watch/WatchRoom/WatchRoom";
 import { Button } from "@/components/ui/Button/Button";
 import { SegmentedControl, type SegmentOption } from "@/components/ui/SegmentedControl/SegmentedControl";
+import { rulesHint } from "@/lib/chat-rules";
 import { channelHref, loginHref } from "@/lib/routes";
 import type { ChatMessage } from "@/types";
 import { isImportant } from "../chatBadge";
 import { ChatComposer } from "../ChatComposer/ChatComposer";
 import { ChatLine } from "../ChatLine/ChatLine";
+import { ChatShield } from "../ChatShield/ChatShield";
 import { MessageMenu } from "../MessageMenu/MessageMenu";
 import { PredictionCard } from "../PredictionCard/PredictionCard";
 import styles from "./ChatPanel.module.css";
@@ -91,12 +93,15 @@ export function ChatPanel() {
         </p>
       )}
 
+      {viewer && watch.isOwner && <ChatShield rules={room.rules} onChange={room.setRules} />}
+
       {viewer ? (
         <ChatComposer
           sparks={viewer.sparks}
           emotes={watch.emotes}
           replyTo={replyTo}
           onCancelReply={() => setReplyTo(null)}
+          hint={watch.isOwner ? null : rulesHint(room.rules)}
           onSend={(text) => {
             const sent = room.send(text, replyTo?.id);
             if (sent) setReplyTo(null);

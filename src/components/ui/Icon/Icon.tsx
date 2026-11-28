@@ -21,6 +21,10 @@ const icons = {
   play: { filled: true, body: <path d="M7 4.5v15l13-7.5z" /> },
   pause: { filled: true, body: <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /> },
   spark: { filled: true, body: <path d="M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2z" /> },
+  shield: { body: <><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></> },
+  hourglass: { body: <path d="M7 3h10M7 21h10M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9s8 4 8 9" /> },
+  filter: { body: <path d="M4 6h16M7 12h10M10 18h4" /> },
+  chart: { body: <><path d="M4 20V4M4 20h16" /><path d="M7 15l4-4 3 3 5-6" /></> },
   // Значки категорий на обложках.
   chat: { body: <><path d="M4 6a2 2 0 012-2h9a2 2 0 012 2v6a2 2 0 01-2 2H9l-4 3V6z" /><path d="M17 9h1a2 2 0 012 2v8l-3-2h-6a2 2 0 01-2-2v-1" /></> },
   gamepad: { body: <><path d="M7 8h10a4 4 0 014 4l-.6 3.6a2.5 2.5 0 01-4.3 1.2L14.5 15h-5l-1.6 1.8a2.5 2.5 0 01-4.3-1.2L3 12a4 4 0 014-4z" /><path d="M8 11v3M6.5 12.5h3M15.5 12h.01M17.5 13.5h.01" /></> },

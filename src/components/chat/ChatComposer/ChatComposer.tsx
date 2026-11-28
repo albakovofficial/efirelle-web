@@ -14,12 +14,14 @@ interface ChatComposerProps {
   /** Сообщение, на которое отвечают; `null` — обычное сообщение. */
   replyTo: ChatMessage | null;
   onCancelReply: () => void;
+  /** Правила чата для зрителя, например «Медленный режим 10 с». */
+  hint?: string | null;
   /** Вернёт false, если сообщение не ушло (нет связи) — тогда текст остаётся в поле. */
   onSend: (text: string) => boolean;
 }
 
 /** Поле ввода: ответ на сообщение, эмодзи канала, баланс искр. */
-export function ChatComposer({ sparks, emotes, replyTo, onCancelReply, onSend }: ChatComposerProps) {
+export function ChatComposer({ sparks, emotes, replyTo, onCancelReply, hint, onSend }: ChatComposerProps) {
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const trimmed = text.trim();
@@ -52,7 +54,7 @@ export function ChatComposer({ sparks, emotes, replyTo, onCancelReply, onSend }:
             value={text}
             onChange={(event) => setText(event.target.value)}
             maxLength={MAX_MESSAGE_LENGTH}
-            placeholder={replyTo ? `Ответить ${replyTo.author}` : "Сообщение в чат"}
+            placeholder={replyTo ? `Ответить ${replyTo.author}` : (hint ?? "Сообщение в чат")}
             autoComplete="off"
             className={styles.input}
           />

@@ -143,6 +143,45 @@ export interface ChannelWatch extends ChannelStatus {
   schedule: ScheduledStream[];
   recordings: Recording[];
   clips: Clip[];
+  chatRules: ChatRules;
+}
+
+/** Правила чата канала, которые видят зрители. */
+export interface ChatRules {
+  /** Секунд между сообщениями одного зрителя; 0 — выключен. */
+  slowModeSeconds: number;
+  followersOnly: boolean;
+}
+
+export const SLOW_MODE_OPTIONS = [0, 5, 10, 30, 60] as const;
+
+/** Настройки модерации в студии. */
+export interface ModerationSettings extends ChatRules {
+  blockedWords: string[];
+  /** Сколько сообщений фильтр скрыл за текущий или последний эфир. */
+  hiddenThisStream: number;
+}
+
+/** Статистика канала: сводка за неделю против прошлой и лента прошедших эфиров. */
+export interface ChannelStats {
+  summary: {
+    followers: number;
+    newFollowers: { week: number; previousWeek: number };
+    avgViewers: { week: number; previousWeek: number };
+    peak: { viewers: number; at: string | null };
+    hoursLive: { week: number; previousWeek: number };
+  };
+  streams: {
+    id: string;
+    title: string;
+    category: string;
+    startedAt: string;
+    durationSeconds: number;
+    peakViewers: number;
+    avgViewers: number;
+    newFollowers: number;
+    points: number[];
+  }[];
 }
 
 /** Запись завершённого эфира (хранится 3 дня). */
@@ -217,6 +256,7 @@ export interface Studio extends ChannelStatus {
   about: ChannelAbout;
   emotes: Emote[];
   schedule: ScheduledStream[];
+  moderation: ModerationSettings;
 }
 
 export type ReportReason = "spam" | "harassment" | "hate" | "sexual" | "violence" | "other";

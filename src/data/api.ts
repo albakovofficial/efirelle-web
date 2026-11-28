@@ -7,20 +7,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { apiRequest, ApiError } from "@/lib/api-request";
-import type {
-  AdminReport,
-  BlockedUser,
-  Category,
-  ChannelStatus,
-  ChannelWatch,
-  Clip,
-  HomeFeed,
-  PushStatus,
-  SearchResults,
-  Stream,
-  Studio,
-  Viewer,
-} from "@/types";
+import type { AdminReport, BlockedUser, Category, ChannelStats, ChannelStatus, ChannelWatch, Clip, HomeFeed, PushStatus, SearchResults, Stream, Studio, Viewer } from "@/types";
 
 const API_URL = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:4000";
 
@@ -82,6 +69,10 @@ export async function search(query: string): Promise<SearchResults> {
 
 export async function getStudio(): Promise<Studio | null> {
   return getOrNull<Studio>("/api/studio");
+}
+
+export async function getStudioStats(): Promise<ChannelStats | null> {
+  return getOrNull<ChannelStats>("/api/studio/stats");
 }
 
 export async function getBlockedUsers(): Promise<BlockedUser[]> {

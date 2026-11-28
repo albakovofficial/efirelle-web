@@ -1,0 +1,149 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-ink-surface);
+  color: var(--color-on-dark);
+}
+
+.summaryIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgb(255 255 255 / 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summaryTitle {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.summaryText {
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.7);
+}
+
+.rules {
+  display: flex;
+  flex-direction: column;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 6px 4px;
+}
+
+.rule + .rule {
+  border-top: 1px solid var(--color-line);
+}
+
+.ruleIcon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruleIconOn {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.ruleText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ruleTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.ruleSubtitle {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.switch {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-accent);
+}
+
+.words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px 4px 54px;
+}
+
+.word {
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addWord {
+  display: inline-flex;
+}
+
+.wordInput {
+  width: 150px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.error {
+  font-size: 13px;
+  color: var(--color-live);
+}

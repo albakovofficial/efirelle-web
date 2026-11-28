@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { chatSocketUrl } from "@/lib/api-client";
 import { channelHref } from "@/lib/routes";
-import type { ChannelWatch, ChatEntry, ChatMessage, Moment, Prediction, Viewer } from "@/types";
+import type { ChannelWatch, ChatEntry, ChatMessage, ChatRules, Moment, Prediction, Viewer } from "@/types";
 
 const MAX_ENTRIES = 200;
 const RECONNECT_MAX_MS = 15_000;
@@ -18,6 +18,7 @@ type ServerEvent =
   | { type: "prediction"; prediction: Prediction }
   | { type: "moment"; moment: Moment }
   | { type: "raid"; target: string; targetName: string }
+  | { type: "rules"; rules: ChatRules }
   | { type: "error"; message: string };
 
 interface WatchRoomState {
@@ -27,11 +28,14 @@ interface WatchRoomState {
   entries: ChatEntry[];
   markers: Moment[];
   prediction: Prediction | null;
+  /** Медленный режим и «только подписчики» — меняются сразу у всех. */
+  rules: ChatRules;
   connected: boolean;
   /** Последняя ошибка чата («слишком часто», «сообщение не прошло фильтр»). */
   notice: string | null;
   send: (text: string, replyTo?: string) => boolean;
   setPrediction: (prediction: Prediction) => void;
+  setRules: (rules: ChatRules) => void;
   removeMessage: (id: string) => void;
   hideAuthor: (authorId: string) => void;
   dismissNotice: () => void;
@@ -56,6 +60,7 @@ export function WatchRoomProvider({ watch, viewer, children }: { watch: ChannelW
   const [entries, setEntries] = useState<ChatEntry[]>(watch.chat);
   const [markers, setMarkers] = useState(watch.markers);
   const [prediction, setPredictionState] = useState(watch.prediction);
+  const [rules, setRules] = useState(watch.chatRules);
   const [connected, setConnected] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -65,6 +70,7 @@ export function WatchRoomProvider({ watch, viewer, children }: { watch: ChannelW
     setEntries(watch.chat);
     setMarkers(watch.markers);
     setPredictionState(watch.prediction);
+    setRules(watch.chatRules);
   }, [watch]);
 
   const setPrediction = useCallback((next: Prediction) => {
@@ -107,6 +113,9 @@ export function WatchRoomProvider({ watch, viewer, children }: { watch: ChannelW
               link: { href: channelHref(event.target), label: "Перейти" },
             },
           ]);
+          break;
+        case "rules":
+          setRules(event.rules);
           break;
         case "error":
           setNotice(event.message);
@@ -170,16 +179,18 @@ export function WatchRoomProvider({ watch, viewer, children }: { watch: ChannelW
       entries,
       markers,
       prediction,
+      rules,
       connected,
       notice,
       send,
       setPrediction,
+      setRules,
       removeMessage: (id) => setEntries((current) => current.filter((entry) => entry.id !== id)),
       hideAuthor: (authorId) =>
         setEntries((current) => current.filter((entry) => entry.kind !== "message" || entry.authorId !== authorId)),
       dismissNotice: () => setNotice(null),
     }),
-    [watch, viewer, viewers, entries, markers, prediction, connected, notice, send, setPrediction],
+    [watch, viewer, viewers, entries, markers, prediction, rules, connected, notice, send, setPrediction],
   );
 
   return <WatchRoomContext.Provider value={value}>{children}</WatchRoomContext.Provider>;

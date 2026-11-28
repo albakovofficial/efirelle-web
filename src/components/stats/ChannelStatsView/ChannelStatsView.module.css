@@ -1,0 +1,159 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 960px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.metric,
+.card {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.caption {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.value {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.note {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.up {
+  color: var(--color-accent);
+}
+
+.down {
+  color: var(--color-live);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart {
+  width: 100%;
+  height: 160px;
+}
+
+.area {
+  fill: var(--color-accent-soft);
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.heading {
+  margin-top: 8px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.streams {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stream {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.streamText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.streamTitle {
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.streamMeta {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.spark {
+  flex: none;
+  width: 120px;
+  height: 40px;
+}
+
+.empty {
+  gap: 6px;
+}
+
+.ghost {
+  width: 100%;
+  height: 56px;
+  margin-bottom: 8px;
+}
+
+.ghost polyline {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-opacity: 0.3;
+  stroke-width: 2.5;
+  stroke-dasharray: 5 6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.emptyText {
+  max-width: 560px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
