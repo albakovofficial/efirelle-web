@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
 import { after, before, describe, it } from "node:test";
-import { auth, createTestApp, registerUser, type TestApp, type TestUser } from "./helpers.js";
+import { alertOf, auth, createTestApp, registerUser, type TestApp, type TestUser } from "./helpers.js";
 
 /** Дождаться фоновой рассылки (она не задерживает ответ медиасерверу). */
 async function waitFor(check: () => boolean | Promise<boolean>, timeoutMs = 2000): Promise<void> {
@@ -61,8 +61,8 @@ describe("Push-уведомления", () => {
     await waitFor(() => t.pushes.length > 0);
     assert.equal(t.pushes.length, 1);
     assert.equal(t.pushes[0]!.device.token, token("a"));
-    assert.equal(t.pushes[0]!.message.title, "Звезда");
-    assert.equal(t.pushes[0]!.message.channel, "pushstar");
+    assert.equal(alertOf(t.pushes[0]!).title, "Звезда");
+    assert.equal(alertOf(t.pushes[0]!).channel, "pushstar");
   });
 
   it("переподключение OBS не рассылает повторно", async () => {

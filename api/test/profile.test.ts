@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { after, before, describe, it } from "node:test";
-import { auth, createTestApp, registerUser, type TestApp, type TestUser } from "./helpers.js";
+import { alertOf, auth, createTestApp, registerUser, type TestApp, type TestUser } from "./helpers.js";
 
 /** Минимальная настоящая PNG-картинка 1×1. */
 const PNG = Buffer.from(
@@ -82,7 +82,7 @@ describe("Страница канала, расписание, ответы и �
     assert.equal(home.upcoming[0].isReminded, true);
 
     assert.equal(await t.services.schedule.sendDueReminders(), 1);
-    assert.equal(t.pushes.at(-1)!.message.title, "Мира скоро в эфире");
+    assert.equal(alertOf(t.pushes.at(-1)!).title, "Мира скоро в эфире");
     assert.equal(await t.services.schedule.sendDueReminders(), 0);
   });
 

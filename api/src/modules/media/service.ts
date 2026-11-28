@@ -65,7 +65,9 @@ export class LiveService {
        WHERE user_id = (SELECT user_id FROM ended) RETURNING user_id`,
       [username],
     );
-    if (row) this.ctx.hub.broadcast(row.user_id, { type: "live", live: false });
+    if (!row) return;
+    this.ctx.hub.broadcast(row.user_id, { type: "live", live: false });
+    this.push.endActivities(row.user_id).catch(() => undefined);
   }
 
   /**

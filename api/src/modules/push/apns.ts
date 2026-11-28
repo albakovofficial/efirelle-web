@@ -13,18 +13,20 @@ export interface PushDevice {
   environment: "production" | "sandbox";
 }
 
-export interface PushMessage {
-  title: string;
-  body: string;
-  /** Адрес канала — приложение откроет его по нажатию. */
-  channel: string;
+/** Одно уведомление: что показать и как срочно. Содержимое собирается в payloads.ts. */
+export interface ApnsPush {
+  /** alert — обычное уведомление, liveactivity — Live Activity на экране блокировки и в Dynamic Island. */
+  type: "alert" | "liveactivity";
+  /** 10 — доставить сразу, 5 — когда удобно устройству (бережёт лимит обновлений Live Activity). */
+  priority: 5 | 10;
+  payload: { aps: Record<string, unknown> } & Record<string, unknown>;
 }
 
 /** unregistered — устройство больше не принимает уведомления, токен можно забыть. */
 export type PushResult = "sent" | "unregistered" | "failed";
 
 export interface PushSender {
-  send(device: PushDevice, message: PushMessage): Promise<PushResult>;
+  send(device: PushDevice, push: ApnsPush): Promise<PushResult>;
   close(): void;
 }
 
@@ -45,7 +47,10 @@ export function parsePrivateKey(pem: string): KeyObject {
   return key;
 }
 
-/** Отправка через HTTP/2 API Apple с авторизацией по ключу (JWT ES256). */
+/**
+ * Отправка через HTTP/2 API Apple с авторизацией по ключу (JWT ES256).
+ * `topic` — bundle id приложения; у Live Activity к нему добавляется «.push-type.liveactivity».
+ */
 export function createApnsSender(credentials: ApnsCredentials, topic: string): PushSender {
   const key = parsePrivateKey(credentials.privateKey);
   const sessions = new Map<string, ClientHttp2Session>();
@@ -73,11 +78,8 @@ export function createApnsSender(credentials: ApnsCredentials, topic: string): P
   }
 
   return {
-    send(device, message) {
-      const payload = JSON.stringify({
-        aps: { alert: { title: message.title, body: message.body }, sound: "default" },
-        channel: message.channel,
-      });
+    send(device, push) {
+      const payload = JSON.stringify(push.payload);
       return new Promise<PushResult>((resolve) => {
         let request: ClientHttp2Stream;
         try {
@@ -85,9 +87,9 @@ export function createApnsSender(credentials: ApnsCredentials, topic: string): P
             ":method": "POST",
             ":path": `/3/device/${device.token}`,
             authorization: authorization(),
-            "apns-topic": topic,
-            "apns-push-type": "alert",
-            "apns-priority": "10",
+            "apns-topic": push.type === "liveactivity" ? `${topic}.push-type.liveactivity` : topic,
+            "apns-push-type": push.type,
+            "apns-priority": String(push.priority),
             "content-type": "application/json",
           });
         } catch {

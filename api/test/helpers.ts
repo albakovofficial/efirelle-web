@@ -10,7 +10,7 @@ import { migrate } from "../src/db/migrate.js";
 import type { Mail, Mailer } from "../src/lib/mailer.js";
 import { Uploads } from "../src/lib/uploads.js";
 import type { LiveService } from "../src/modules/media/service.js";
-import type { PushDevice, PushMessage, PushResult, PushSender } from "../src/modules/push/apns.js";
+import type { ApnsPush, PushDevice, PushResult, PushSender } from "../src/modules/push/apns.js";
 import { ChatHub } from "../src/realtime/hub.js";
 
 export interface TestApp {
@@ -20,7 +20,7 @@ export interface TestApp {
   services: Services;
   mails: Mail[];
   /** Уведомления, «отправленные» в APNs. */
-  pushes: { device: PushDevice; message: PushMessage }[];
+  pushes: { device: PushDevice; push: ApnsPush }[];
   /** Что ответит APNs на токен (по умолчанию — доставлено). */
   pushResults: Map<string, PushResult>;
   close(): Promise<void>;
@@ -59,8 +59,8 @@ export async function createTestApp(): Promise<TestApp> {
   const pushes: TestApp["pushes"] = [];
   const pushResults = new Map<string, PushResult>();
   const pushTransport: PushSender = {
-    async send(device, message) {
-      pushes.push({ device, message });
+    async send(device, push) {
+      pushes.push({ device, push });
       return pushResults.get(device.token) ?? "sent";
     },
     close() {},
@@ -120,4 +120,10 @@ export async function streamKey(app: FastifyInstance, user: TestUser): Promise<s
     ingest: { streamKey: string };
   };
   return studio.ingest.streamKey.split("?key=")[1]!;
+}
+
+/** Заголовок, текст и канал обычного уведомления или уведомления при запуске Live Activity. */
+export function alertOf(entry: { push: ApnsPush }): { title: string; body: string; channel?: string } {
+  const alert = entry.push.payload.aps.alert as { title: string; body: string };
+  return { ...alert, channel: entry.push.payload.channel as string | undefined };
 }

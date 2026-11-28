@@ -1,13 +1,21 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { AppContext } from "../../context.js";
-import { badRequest, parse } from "../../lib/http.js";
+import { badRequest, notFound, parse } from "../../lib/http.js";
 import { requireAdmin, requireViewer } from "../auth/sessions.js";
 import { parsePrivateKey } from "./apns.js";
 import type { PushService } from "./service.js";
 
 const deviceBody = z.object({
   token: z.string().trim().toLowerCase().regex(/^[0-9a-f]{32,200}$/, "Некорректный токен устройства"),
+  environment: z.enum(["production", "sandbox"]),
+});
+const pushToken = z.string().trim().toLowerCase().regex(/^[0-9a-f]{32,400}$/, "Некорректный токен");
+/** Токен запуска Live Activity; `null` — пользователь выключил Live Activities для приложения. */
+const activityStartBody = z.object({ startToken: pushToken.nullable() });
+const activityBody = z.object({
+  token: pushToken,
+  channel: z.string().trim().toLowerCase(),
   environment: z.enum(["production", "sandbox"]),
 });
 const preferencesBody = z.object({ live: z.boolean() });
@@ -17,7 +25,7 @@ const apnsBody = z.object({
   privateKey: z.string().trim().min(100, "Вставьте содержимое файла .p8 целиком").max(4000),
 });
 
-/** Устройства и настройки уведомлений пользователя; ключ APNs — в админке. */
+/** Устройства, Live Activities и настройки уведомлений пользователя; ключ APNs — в админке. */
 export function registerPushRoutes(app: FastifyInstance, ctx: AppContext, push: PushService): void {
   /** Приложение сообщает токен после входа и при каждом запуске (Apple может его сменить). */
   app.put("/api/me/devices", async (request) => {
@@ -35,6 +43,33 @@ export function registerPushRoutes(app: FastifyInstance, ctx: AppContext, push: 
   app.delete<{ Params: { token: string } }>("/api/me/devices/:token", async (request) => {
     const viewer = requireViewer(request);
     await ctx.db.pool.query("DELETE FROM devices WHERE token = $1 AND user_id = $2", [request.params.token.toLowerCase(), viewer.id]);
+    return { ok: true };
+  });
+
+  /** iOS 17.2+: токен, которым сервер запускает Live Activity «канал в эфире» вместо обычного уведомления. */
+  app.put<{ Params: { token: string } }>("/api/me/devices/:token/live-activity", async (request) => {
+    const viewer = requireViewer(request);
+    const { startToken } = parse(activityStartBody, request.body);
+    const updated = await ctx.db.pool.query("UPDATE devices SET activity_start_token = $1 WHERE token = $2 AND user_id = $3", [
+      startToken,
+      request.params.token.toLowerCase(),
+      viewer.id,
+    ]);
+    if (updated.rowCount === 0) throw notFound("Устройство не найдено");
+    return { ok: true };
+  });
+
+  /** Запущенная Live Activity сообщает свой токен — по нему придут зрители и конец эфира. */
+  app.put("/api/me/live-activities", async (request) => {
+    const viewer = requireViewer(request);
+    const { token, channel, environment } = parse(activityBody, request.body);
+    const saved = await ctx.db.pool.query(
+      `INSERT INTO live_activities (token, user_id, channel_id, environment)
+       SELECT $1, $2, c.user_id, $4 FROM channels c JOIN users u ON u.id = c.user_id WHERE u.username = $3
+       ON CONFLICT (token) DO UPDATE SET channel_id = EXCLUDED.channel_id, user_id = EXCLUDED.user_id`,
+      [token, viewer.id, channel, environment],
+    );
+    if (saved.rowCount === 0) throw notFound("Канал не найден");
     return { ok: true };
   });
 
